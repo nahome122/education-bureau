@@ -1,0 +1,20 @@
+.schools-page { animation: fadeIn 0.3s ease; }
+.filters-row { display: flex; gap: var(--spacing-sm); align-items: center; }
+.schools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--spacing-lg); }
+.school-card { padding: var(--spacing-lg); }
+.school-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-sm); }
+.school-icon { width: 44px; height: 44px; background: var(--primary-alpha); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--primary); }
+.school-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.school-name { font-size: var(--font-size-base); font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.school-principal { font-size: var(--font-size-sm); margin-bottom: var(--spacing-md); }
+.school-stats { display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-sm); }
+.school-stat { text-align: center; }
+.school-stat-val { display: block; font-size: var(--font-size-xl); font-weight: 700; color: var(--primary); }
+.school-stat-lbl { font-size: var(--font-size-xs); color: var(--text-muted); }
+.school-type-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-md); }
+.school-actions { display: flex; gap: var(--spacing-sm); }
+.btn-danger-icon { color: var(--danger) !important; }
+.delete-icon-wrap { width: 64px; height: 64px; background: var(--danger-alpha); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--danger); margin: 0 auto var(--spacing-md); }
+.id-code { font-family: monospace; font-size: 12px; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px; }
+.spinner-sm { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }

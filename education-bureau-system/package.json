@@ -1,0 +1,29 @@
+{
+  "name": "education-bureau-system",
+  "version": "1.0.0",
+  "description": "Teachers & Staff Management System - Wachale Woreda Education Bureau",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "education",
+    "management",
+    "teachers",
+    "staff"
+  ],
+  "author": "Wachale Woreda Education Bureau",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "connect-flash": "^0.1.1",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "method-override": "^3.0.0",
+    "mysql2": "^3.11.0",
+    "sqlite3": "^6.0.1"
+  }
+}

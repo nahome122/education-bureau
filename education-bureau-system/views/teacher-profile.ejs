@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | TSMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="app-body">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo"><i class="fas fa-graduation-cap"></i><div><h2>TSMS</h2><span>Education Bureau</span></div></div>
+            <button class="sidebar-close" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-link"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+            <a href="/teachers" class="nav-link active"><i class="fas fa-chalkboard-teacher"></i><span>Teachers</span></a>
+            <a href="/schools" class="nav-link"><i class="fas fa-school"></i><span>Schools</span></a>
+            <a href="/staff" class="nav-link"><i class="fas fa-users-cog"></i><span>Staff</span></a>
+            <a href="/attendance" class="nav-link"><i class="fas fa-calendar-check"></i><span>Attendance</span></a>
+            <a href="/leaves" class="nav-link"><i class="fas fa-calendar-times"></i><span>Leaves</span></a>
+            <% if (user && user.role === 'admin') { %><a href="/users" class="nav-link"><i class="fas fa-user-shield"></i><span>Users</span></a><% } %>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info"><div class="user-avatar" style="background:<%= user ? user.avatar_color : '#10b981' %>"><%= user ? user.full_name.charAt(0).toUpperCase() : 'A' %></div><div class="user-details"><span class="user-name"><%= user ? user.full_name : 'Admin' %></span><span class="user-role"><%= user ? user.role : 'admin' %></span></div></div>
+            <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <div><h1><%= teacher.full_name %></h1><p class="breadcrumb"><a href="/dashboard">Dashboard</a> / <a href="/teachers">Teachers</a> / Profile</p></div>
+            </div>
+            <div class="top-bar-right">
+                <a href="/teachers" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
+            </div>
+        </header>
+
+        <% if (success_msg && success_msg.length > 0) { %><div class="alert alert-success page-alert"><i class="fas fa-check-circle"></i><span><%= success_msg[0] %></span><button onclick="this.parentElement.remove()" class="alert-close">&times;</button></div><% } %>
+        <% if (error_msg && error_msg.length > 0) { %><div class="alert alert-error page-alert"><i class="fas fa-exclamation-circle"></i><span><%= error_msg[0] %></span><button onclick="this.parentElement.remove()" class="alert-close">&times;</button></div><% } %>
+
+        <!-- Profile Header Card -->
+        <div class="profile-header-card">
+            <div class="profile-avatar-lg" style="background:<%= teacher.gender === 'Male' ? 'linear-gradient(135deg,#3b82f6,#2563eb)' : 'linear-gradient(135deg,#ec4899,#db2777)' %>">
+                <%= teacher.full_name.charAt(0).toUpperCase() %>
+            </div>
+            <div class="profile-header-info">
+                <h2><%= teacher.full_name %></h2>
+                <p><i class="fas fa-chalkboard-teacher"></i> <%= teacher.subject_specialization %> Teacher</p>
+                <p><i class="fas fa-school"></i> <%= teacher.school_name %></p>
+                <span class="status-badge status-<%= teacher.status.toLowerCase().replace(' ','-') %>"><%= teacher.status %></span>
+            </div>
+            <div class="profile-header-stats">
+                <div class="ph-stat"><span class="ph-val"><%= attStats.Present %></span><span class="ph-label">Present</span></div>
+                <div class="ph-stat"><span class="ph-val" style="color:#f87171"><%= attStats.Absent %></span><span class="ph-label">Absent</span></div>
+                <div class="ph-stat"><span class="ph-val" style="color:#fbbf24"><%= attStats.Late %></span><span class="ph-label">Late</span></div>
+                <div class="ph-stat"><span class="ph-val"><%= leaves.length %></span><span class="ph-label">Leaves</span></div>
+            </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="profile-grid">
+            <!-- Personal & Employment Info -->
+            <div class="profile-info-card">
+                <div class="pi-header"><i class="fas fa-id-card"></i> Personal Information</div>
+                <div class="pi-body">
+                    <div class="pi-row"><span class="pi-label">Gender</span><span class="pi-val"><%= teacher.gender %></span></div>
+                    <div class="pi-row"><span class="pi-label">Qualification</span><span class="pi-val"><%= teacher.qualification %></span></div>
+                    <div class="pi-row"><span class="pi-label">Subject</span><span class="pi-val"><%= teacher.subject_specialization %></span></div>
+                    <div class="pi-row"><span class="pi-label">School</span><span class="pi-val"><%= teacher.school_name %></span></div>
+                    <div class="pi-row"><span class="pi-label">Phone</span><span class="pi-val"><%= teacher.phone || '—' %></span></div>
+                    <div class="pi-row"><span class="pi-label">Email</span><span class="pi-val"><%= teacher.email || '—' %></span></div>
+                    <div class="pi-row"><span class="pi-label">Address</span><span class="pi-val"><%= teacher.address || '—' %></span></div>
+                </div>
+            </div>
+            <div class="profile-info-card">
+                <div class="pi-header"><i class="fas fa-briefcase"></i> Employment Details</div>
+                <div class="pi-body">
+                    <div class="pi-row"><span class="pi-label">Hire Date</span><span class="pi-val"><%= teacher.hire_date ? new Date(teacher.hire_date).toLocaleDateString('en-GB') : '—' %></span></div>
+                    <div class="pi-row"><span class="pi-label">Experience</span><span class="pi-val"><%= teacher.experience_years %> years</span></div>
+                    <div class="pi-row"><span class="pi-label">Salary</span><span class="pi-val">ETB <%= Number(teacher.salary).toLocaleString() %></span></div>
+                    <div class="pi-row"><span class="pi-label">Status</span><span class="pi-val"><span class="status-badge status-<%= teacher.status.toLowerCase().replace(' ','-') %>"><%= teacher.status %></span></span></div>
+                    <% if (teacher.notes) { %>
+                    <div class="pi-row pi-notes"><span class="pi-label">Notes</span><span class="pi-val"><%= teacher.notes %></span></div>
+                    <% } %>
+                </div>
+                <div style="padding:16px 20px;border-top:1px solid var(--border)">
+                    <button class="btn btn-outline btn-sm" onclick="openEditModal(<%= JSON.stringify(teacher) %>)"><i class="fas fa-edit"></i> Edit Profile</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave History -->
+        <div class="table-card" style="margin-top:20px">
+            <div class="table-header"><h2><i class="fas fa-calendar-times"></i> Leave History</h2><a href="/leaves" class="btn btn-sm btn-outline">View All Leaves</a></div>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th></tr></thead>
+                    <tbody>
+                    <% if (leaves.length > 0) { leaves.forEach(l => { const days = Math.ceil((new Date(l.to_date) - new Date(l.from_date)) / (1000*60*60*24)) + 1; %>
+                    <tr>
+                        <td><%= l.leave_type %></td>
+                        <td><%= new Date(l.from_date).toLocaleDateString('en-GB') %></td>
+                        <td><%= new Date(l.to_date).toLocaleDateString('en-GB') %></td>
+                        <td><%= days %></td>
+                        <td><%= l.reason || '—' %></td>
+                        <td><span class="leave-badge leave-<%= l.status.toLowerCase() %>"><%= l.status %></span></td>
+                    </tr>
+                    <% }) } else { %><tr><td colspan="6" class="empty-state">No leave records</td></tr><% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Attendance History -->
+        <div class="table-card" style="margin-top:20px">
+            <div class="table-header"><h2><i class="fas fa-calendar-check"></i> Recent Attendance (Last 30)</h2><a href="/attendance?type=teacher" class="btn btn-sm btn-outline">Manage Attendance</a></div>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Date</th><th>Status</th><th>Notes</th></tr></thead>
+                    <tbody>
+                    <% if (attendance.length > 0) { attendance.forEach(a => { %>
+                    <tr>
+                        <td><%= new Date(a.date).toLocaleDateString('en-GB') %></td>
+                        <td><span class="att-badge att-<%= a.status.toLowerCase() %>"><%= a.status %></span></td>
+                        <td><%= a.notes || '—' %></td>
+                    </tr>
+                    <% }) } else { %><tr><td colspan="3" class="empty-state">No attendance records</td></tr><% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header"><h2><i class="fas fa-edit"></i> Edit Teacher</h2><button onclick="closeModal('editModal')" class="modal-close">&times;</button></div>
+            <form id="editForm" method="POST" class="modal-form">
+                <div class="form-grid">
+                    <div class="form-group"><label>Full Name *</label><input type="text" name="full_name" id="edit_full_name" required></div>
+                    <div class="form-group"><label>Gender *</label><select name="gender" id="edit_gender" required><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                    <div class="form-group"><label>Qualification *</label><input type="text" name="qualification" id="edit_qualification" required></div>
+                    <div class="form-group"><label>Subject *</label><input type="text" name="subject_specialization" id="edit_subject" required></div>
+                    <div class="form-group"><label>School *</label><input type="text" name="school_name" id="edit_school" required></div>
+                    <div class="form-group"><label>Phone</label><input type="text" name="phone" id="edit_phone"></div>
+                    <div class="form-group"><label>Email</label><input type="email" name="email" id="edit_email"></div>
+                    <div class="form-group"><label>Hire Date *</label><input type="date" name="hire_date" id="edit_hire_date" required></div>
+                    <div class="form-group"><label>Salary</label><input type="number" name="salary" id="edit_salary" step="0.01"></div>
+                    <div class="form-group"><label>Experience</label><input type="number" name="experience_years" id="edit_experience"></div>
+                    <div class="form-group"><label>Status</label><select name="status" id="edit_status"><option value="Active">Active</option><option value="On Leave">On Leave</option><option value="Transferred">Transferred</option><option value="Retired">Retired</option><option value="Terminated">Terminated</option></select></div>
+                </div>
+                <div class="form-group full-width"><label>Notes</label><textarea name="notes" id="edit_notes" rows="2"></textarea></div>
+                <div class="modal-actions"><button type="button" onclick="closeModal('editModal')" class="btn btn-outline">Cancel</button><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('sidebar-open');}
+    function openModal(id){document.getElementById(id).classList.add('active');}
+    function closeModal(id){document.getElementById(id).classList.remove('active');}
+    function openEditModal(t){
+        document.getElementById('editForm').action='/teachers/'+t.id+'/update';
+        document.getElementById('edit_full_name').value=t.full_name;
+        document.getElementById('edit_gender').value=t.gender;
+        document.getElementById('edit_qualification').value=t.qualification;
+        document.getElementById('edit_subject').value=t.subject_specialization;
+        document.getElementById('edit_school').value=t.school_name;
+        document.getElementById('edit_phone').value=t.phone||'';
+        document.getElementById('edit_email').value=t.email||'';
+        document.getElementById('edit_hire_date').value=t.hire_date?new Date(t.hire_date).toISOString().split('T')[0]:'';
+        document.getElementById('edit_salary').value=t.salary||'';
+        document.getElementById('edit_experience').value=t.experience_years||'';
+        document.getElementById('edit_status').value=t.status;
+        document.getElementById('edit_notes').value=t.notes||'';
+        openModal('editModal');
+    }
+    document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)})});
+    setTimeout(()=>{document.querySelectorAll('.page-alert').forEach(el=>{el.style.animation='slideUp 0.3s ease forwards';setTimeout(()=>el.remove(),300)})},5000);
+    </script>
+</body>
+</html>

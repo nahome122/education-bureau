@@ -1,0 +1,100 @@
+/* ── Page ─────────────────────────────────────────────────── */
+.users-page { animation: fadeIn 0.3s ease; }
+
+/* ── Filters row ─────────────────────────────────────────── */
+.filters-row { display: flex; gap: var(--spacing-sm); align-items: center; flex-wrap: wrap; }
+
+/* ── Role legend ─────────────────────────────────────────── */
+.role-legend { padding: var(--spacing-md) var(--spacing-lg); }
+.role-legend-title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: var(--font-size-sm); font-weight: 700;
+  color: var(--text-primary); margin-bottom: var(--spacing-md);
+}
+.role-legend-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--spacing-sm);
+}
+.role-legend-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 12px; background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+.role-legend-item .badge { flex-shrink: 0; margin-top: 2px; }
+.role-legend-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+/* ── Table cells ─────────────────────────────────────────── */
+.user-cell { display: flex; align-items: center; gap: var(--spacing-sm); }
+.self-row  { background: rgba(37,99,235,0.03); }
+.avatar-self { background: var(--gradient-secondary) !important; }
+
+.you-badge {
+  display: inline-block; margin-left: 6px;
+  background: var(--primary-alpha); color: var(--primary);
+  font-size: 10px; font-weight: 700; padding: 1px 6px;
+  border-radius: var(--radius-full); vertical-align: middle;
+}
+
+.username-code {
+  font-family: monospace; font-size: 12px;
+  background: var(--bg-secondary); color: var(--primary);
+  padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border);
+}
+
+/* ── Action buttons ──────────────────────────────────────── */
+.action-btns { display: flex; gap: 4px; }
+.btn-danger-icon { color: var(--danger) !important; }
+.btn-danger-icon:hover { background: var(--danger-alpha) !important; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+/* ── Modal sections ──────────────────────────────────────── */
+.modal-section-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: 6px; border-bottom: 1px solid var(--border-light);
+}
+
+/* ── Password field ──────────────────────────────────────── */
+.pw-field-wrap { position: relative; }
+.pw-eye-btn {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 18px; display: flex; align-items: center;
+  padding: 0;
+}
+.pw-eye-btn:hover { color: var(--primary); }
+
+/* ── Status toggle ───────────────────────────────────────── */
+.status-toggle-row { display: flex; gap: var(--spacing-sm); }
+.status-toggle-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 18px; border-radius: var(--radius-md);
+  font-size: var(--font-size-sm); font-weight: 600;
+  font-family: var(--font-family);
+  border: 1.5px solid var(--border);
+  background: transparent; color: var(--text-secondary);
+  cursor: pointer; transition: all var(--transition-fast);
+}
+.status-toggle-btn.active-on  { border-color: var(--success); background: var(--success-alpha); color: var(--success); }
+.status-toggle-btn.active-off { border-color: var(--danger);  background: var(--danger-alpha);  color: var(--danger); }
+
+/* ── Delete icon ─────────────────────────────────────────── */
+.delete-icon-wrap {
+  width: 68px; height: 68px; background: var(--danger-alpha); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; color: var(--danger); margin: 0 auto var(--spacing-md);
+}
+
+/* ── Spinner ─────────────────────────────────────────────── */
+.spinner-sm {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .role-legend-grid { grid-template-columns: 1fr; }
+}

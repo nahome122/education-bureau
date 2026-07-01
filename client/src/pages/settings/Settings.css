@@ -1,0 +1,14 @@
+.settings-page { animation: fadeIn 0.3s ease; }
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: var(--spacing-lg); }
+.settings-card { padding: var(--spacing-xl); }
+.settings-card h3 { font-size: var(--font-size-lg); font-weight: 700; margin-bottom: var(--spacing-lg); }
+.settings-icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: var(--spacing-md); }
+.settings-icon.primary { background: var(--primary-alpha); color: var(--primary); }
+.settings-icon.success { background: var(--success-alpha); color: var(--success); }
+.settings-icon.warning { background: var(--warning-alpha); color: var(--warning); }
+.settings-icon.info    { background: var(--info-alpha);    color: var(--info); }
+.settings-info-list { display: flex; flex-direction: column; gap: 0; }
+.settings-info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-light); font-size: var(--font-size-sm); gap: 8px; }
+.settings-info-row:last-child { border-bottom: none; }
+.settings-info-row span:first-child { color: var(--text-secondary); white-space: nowrap; }
+.settings-info-row span:last-child { color: var(--text-primary); text-align: right; }

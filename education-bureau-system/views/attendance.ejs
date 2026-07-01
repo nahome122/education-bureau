@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance | TSMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="app-body">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo"><i class="fas fa-graduation-cap"></i><div><h2>TSMS</h2><span>Education Bureau</span></div></div>
+            <button class="sidebar-close" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-link"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+            <a href="/teachers" class="nav-link"><i class="fas fa-chalkboard-teacher"></i><span>Teachers</span></a>
+            <a href="/schools" class="nav-link"><i class="fas fa-school"></i><span>Schools</span></a>
+            <a href="/staff" class="nav-link"><i class="fas fa-users-cog"></i><span>Staff</span></a>
+            <a href="/attendance" class="nav-link active"><i class="fas fa-calendar-check"></i><span>Attendance</span></a>
+            <a href="/leaves" class="nav-link"><i class="fas fa-calendar-times"></i><span>Leaves</span></a>
+            <% if (user && user.role === 'admin') { %><a href="/users" class="nav-link"><i class="fas fa-user-shield"></i><span>Users</span></a><% } %>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info"><div class="user-avatar" style="background:<%= user ? user.avatar_color : '#10b981' %>"><%= user ? user.full_name.charAt(0).toUpperCase() : 'A' %></div><div class="user-details"><span class="user-name"><%= user ? user.full_name : 'Admin' %></span><span class="user-role"><%= user ? user.role : 'admin' %></span></div></div>
+            <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <div><h1>Attendance Register</h1><p class="breadcrumb"><a href="/dashboard">Dashboard</a> / Attendance</p></div>
+            </div>
+        </header>
+
+        <% if (success_msg && success_msg.length > 0) { %><div class="alert alert-success page-alert"><i class="fas fa-check-circle"></i><span><%= success_msg[0] %></span><button onclick="this.parentElement.remove()" class="alert-close">&times;</button></div><% } %>
+        <% if (error_msg && error_msg.length > 0) { %><div class="alert alert-error page-alert"><i class="fas fa-exclamation-circle"></i><span><%= error_msg[0] %></span><button onclick="this.parentElement.remove()" class="alert-close">&times;</button></div><% } %>
+
+        <!-- Date & Type Selector -->
+        <div class="filter-bar" style="margin-bottom:20px">
+            <form method="GET" action="/attendance" class="filter-form" id="attFilterForm">
+                <div style="display:flex;align-items:center;gap:8px;font-weight:500;color:var(--text-secondary)"><i class="fas fa-calendar-alt"></i> Date:</div>
+                <input type="date" name="date" value="<%= date %>" class="att-date-input" onchange="this.form.submit()">
+                <div style="display:flex;gap:4px">
+                    <button type="submit" name="type" value="teacher" class="btn <%= type==='teacher' ? 'btn-primary' : 'btn-outline' %>" id="typeTeacherBtn"><i class="fas fa-chalkboard-teacher"></i> Teachers</button>
+                    <button type="submit" name="type" value="staff" class="btn <%= type==='staff' ? 'btn-primary' : 'btn-outline' %>" id="typeStaffBtn"><i class="fas fa-users-cog"></i> Staff</button>
+                </div>
+            </form>
+            <div style="display:flex;gap:12px">
+                <div class="att-stat-pill present"><i class="fas fa-check"></i> <%= stats.Present %> Present</div>
+                <div class="att-stat-pill absent"><i class="fas fa-times"></i> <%= stats.Absent %> Absent</div>
+                <div class="att-stat-pill late"><i class="fas fa-clock"></i> <%= stats.Late %> Late</div>
+            </div>
+        </div>
+
+        <!-- Attendance Form -->
+        <% if (people.length > 0) { %>
+        <form method="POST" action="/attendance" id="attendanceForm">
+            <input type="hidden" name="date" value="<%= date %>">
+            <input type="hidden" name="type" value="<%= type %>">
+            <div class="table-card">
+                <div class="table-header">
+                    <h2><i class="fas fa-list-check"></i> <%= type === 'teacher' ? 'Teacher' : 'Staff' %> Attendance — <%= new Date(date + 'T00:00:00').toLocaleDateString('en-GB', {weekday:'long', year:'numeric', month:'long', day:'numeric'}) %></h2>
+                    <div style="display:flex;gap:8px">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="markAll('Present')" id="markAllPresent"><i class="fas fa-check-double"></i> All Present</button>
+                        <button type="submit" class="btn btn-sm btn-primary" id="saveAttBtn"><i class="fas fa-save"></i> Save Attendance</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th><%= type === 'teacher' ? 'School' : 'Department' %></th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <% people.forEach((p, i) => { const existing = attendanceMap[p.id] || {}; %>
+                        <tr class="att-row" id="attRow<%= p.id %>">
+                            <td><%= i + 1 %></td>
+                            <td>
+                                <input type="hidden" name="records[<%= i %>][person_id]" value="<%= p.id %>">
+                                <div class="cell-with-avatar">
+                                    <div class="mini-avatar" style="background:<%= p.gender==='Male'?'#3b82f6':'#ec4899' %>"><%= p.full_name.charAt(0) %></div>
+                                    <a href="/<%= type === 'teacher' ? 'teachers' : 'staff' %>/<%= p.id %>" style="color:var(--text-primary);font-weight:500"><%= p.full_name %></a>
+                                </div>
+                            </td>
+                            <td><%= p.info %></td>
+                            <td>
+                                <div class="att-status-group" id="attGroup<%= p.id %>">
+                                    <label class="att-radio <%= (existing.status || 'Present') === 'Present' ? 'att-present-active' : '' %>">
+                                        <input type="radio" name="records[<%= i %>][status]" value="Present" <%= (existing.status || 'Present') === 'Present' ? 'checked' : '' %> onchange="updateRow(<%= p.id %>, 'Present')"> Present
+                                    </label>
+                                    <label class="att-radio <%= existing.status === 'Absent' ? 'att-absent-active' : '' %>">
+                                        <input type="radio" name="records[<%= i %>][status]" value="Absent" <%= existing.status === 'Absent' ? 'checked' : '' %> onchange="updateRow(<%= p.id %>, 'Absent')"> Absent
+                                    </label>
+                                    <label class="att-radio <%= existing.status === 'Late' ? 'att-late-active' : '' %>">
+                                        <input type="radio" name="records[<%= i %>][status]" value="Late" <%= existing.status === 'Late' ? 'checked' : '' %> onchange="updateRow(<%= p.id %>, 'Late')"> Late
+                                    </label>
+                                </div>
+                            </td>
+                            <td><input type="text" name="records[<%= i %>][notes]" value="<%= existing.notes || '' %>" placeholder="Optional note..." class="att-notes-input"></td>
+                        </tr>
+                        <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Attendance</button>
+                </div>
+            </div>
+        </form>
+        <% } else { %>
+        <div class="table-card"><div class="empty-state" style="padding:60px"><i class="fas fa-users" style="font-size:2rem;display:block;margin-bottom:12px"></i>No active <%= type %>s found</div></div>
+        <% } %>
+    </main>
+
+    <script>
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('sidebar-open');}
+    function updateRow(id, status) {
+        const row = document.getElementById('attRow' + id);
+        row.style.background = status === 'Absent' ? 'rgba(239,68,68,0.06)' : status === 'Late' ? 'rgba(245,158,11,0.06)' : '';
+        const labels = document.querySelectorAll('#attGroup' + id + ' label');
+        labels.forEach(l => { l.className = 'att-radio'; });
+        const active = document.querySelector('#attGroup' + id + ' input[value="' + status + '"]');
+        if (active) active.parentElement.className = 'att-radio att-' + status.toLowerCase() + '-active';
+    }
+    function markAll(status) {
+        document.querySelectorAll('.att-row').forEach(row => {
+            const id = row.id.replace('attRow','');
+            const radio = row.querySelector('input[value="' + status + '"]');
+            if (radio) { radio.checked = true; updateRow(id, status); }
+        });
+    }
+    // Initialize row highlighting
+    document.querySelectorAll('.att-row').forEach(row => {
+        const checked = row.querySelector('input[type=radio]:checked');
+        if (checked) { const id = row.id.replace('attRow',''); updateRow(id, checked.value); }
+    });
+    setTimeout(()=>{document.querySelectorAll('.page-alert').forEach(el=>{el.style.animation='slideUp 0.3s ease forwards';setTimeout(()=>el.remove(),300)})},5000);
+    </script>
+</body>
+</html>

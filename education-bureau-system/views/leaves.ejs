@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Management | TSMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="app-body">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo"><i class="fas fa-graduation-cap"></i><div><h2>TSMS</h2><span>Education Bureau</span></div></div>
+            <button class="sidebar-close" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-link"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+            <a href="/teachers" class="nav-link"><i class="fas fa-chalkboard-teacher"></i><span>Teachers</span></a>
+            <a href="/schools" class="nav-link"><i class="fas fa-school"></i><span>Schools</span></a>
+            <a href="/staff" class="nav-link"><i class="fas fa-users-cog"></i><span>Staff</span></a>
+            <a href="/attendance" class="nav-link"><i class="fas fa-calendar-check"></i><span>Attendance</span></a>
+            <a href="/leaves" class="nav-link active"><i class="fas fa-calendar-times"></i><span>Leaves</span></a>
+            <% if (user && user.role === 'admin') { %><a href="/users" class="nav-link"><i class="fas fa-user-shield"></i><span>Users</span></a><% } %>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info"><div class="user-avatar" style="background:<%= user ? user.avatar_color : '#10b981' %>"><%= user ? user.full_name.charAt(0).toUpperCase() : 'A' %></div><div class="user-details"><span class="user-name"><%= user ? user.full_name : 'Admin' %></span><span class="user-role"><%= user ? user.role : 'admin' %></span></div></div>
+            <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <div><h1>Leave Management</h1><p class="breadcrumb"><a href="/dashboard">Dashboard</a> / Leaves</p></div>
+            </div>
+            <div class="top-bar-right">
+                <button class="btn btn-primary" onclick="openModal('addLeaveModal')" id="addLeaveBtn"><i class="fas fa-plus"></i> New Leave Request</button>
+            </div>
+        </header>
+
+        <% if (success_msg && success_msg.length > 0) { %><div class="alert alert-success page-alert"><i class="fas fa-check-circle"></i><span><%= success_msg[0] %></span><button onclick="this.parentElement.remove()" class="alert-close">&times;</button></div><% } %>
+        <% if (error_msg && error_msg.length > 0) { %><div class="alert alert-error page-alert"><i class="fas fa-exclamation-circle"></i><span><%= error_msg[0] %></span><button onclick="this.parentElement.remove()" class="alert-close">&times;</button></div><% } %>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar" style="margin-bottom:20px">
+            <form method="GET" action="/leaves" class="filter-form">
+                <select name="status" onchange="this.form.submit()" id="leaveStatusFilter">
+                    <option value="">All Status</option>
+                    <option value="Pending" <%= statusFilter==='Pending'?'selected':'' %>>Pending</option>
+                    <option value="Approved" <%= statusFilter==='Approved'?'selected':'' %>>Approved</option>
+                    <option value="Rejected" <%= statusFilter==='Rejected'?'selected':'' %>>Rejected</option>
+                </select>
+                <select name="type" onchange="this.form.submit()" id="leaveTypeFilter">
+                    <option value="">All Types</option>
+                    <option value="teacher" <%= typeFilter==='teacher'?'selected':'' %>>Teachers</option>
+                    <option value="staff" <%= typeFilter==='staff'?'selected':'' %>>Staff</option>
+                </select>
+            </form>
+            <div class="filter-info"><span class="badge"><%= leaves.length %> records found</span></div>
+        </div>
+
+        <!-- Leaves Table -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Leave Type</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Days</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <% if (leaves.length > 0) { leaves.forEach((l, i) => { %>
+                    <tr>
+                        <td><%= i + 1 %></td>
+                        <td>
+                            <a href="/<%= l.person_type === 'teacher' ? 'teachers' : 'staff' %>/<%= l.person_id %>" class="name-link">
+                                <%= l.person_name %>
+                            </a>
+                        </td>
+                        <td><span class="type-badge type-<%= l.person_type %>"><%= l.person_type === 'teacher' ? 'Teacher' : 'Staff' %></span></td>
+                        <td><%= l.leave_type %></td>
+                        <td><%= new Date(l.from_date).toLocaleDateString('en-GB') %></td>
+                        <td><%= new Date(l.to_date).toLocaleDateString('en-GB') %></td>
+                        <td><strong><%= l.days %></strong></td>
+                        <td><span title="<%= l.reason || '' %>" style="max-width:150px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= l.reason || '—' %></span></td>
+                        <td><span class="leave-badge leave-<%= l.status.toLowerCase() %>"><%= l.status %></span></td>
+                        <td class="actions-cell">
+                            <% if (user && user.role === 'admin' && l.status === 'Pending') { %>
+                            <form action="/leaves/<%= l.id %>/approve" method="POST" style="display:inline">
+                                <button type="submit" class="btn-icon" style="color:#34d399" title="Approve" id="approveLeave<%= l.id %>"><i class="fas fa-check"></i></button>
+                            </form>
+                            <form action="/leaves/<%= l.id %>/reject" method="POST" style="display:inline">
+                                <button type="submit" class="btn-icon" style="color:#f87171" title="Reject" id="rejectLeave<%= l.id %>"><i class="fas fa-times"></i></button>
+                            </form>
+                            <% } %>
+                            <% if (user && user.role === 'admin') { %>
+                            <form action="/leaves/<%= l.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('Delete this leave request?')">
+                                <button type="submit" class="btn-icon btn-delete" title="Delete" id="deleteLeave<%= l.id %>"><i class="fas fa-trash"></i></button>
+                            </form>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% }) } else { %>
+                    <tr><td colspan="10" class="empty-state"><i class="fas fa-calendar-times" style="font-size:2rem;display:block;margin-bottom:8px"></i>No leave requests found</td></tr>
+                    <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Leave Modal -->
+    <div class="modal-overlay" id="addLeaveModal">
+        <div class="modal">
+            <div class="modal-header"><h2><i class="fas fa-calendar-plus"></i> New Leave Request</h2><button onclick="closeModal('addLeaveModal')" class="modal-close">&times;</button></div>
+            <form action="/leaves" method="POST" class="modal-form" id="leaveForm">
+                <div class="form-group">
+                    <label>Person Type *</label>
+                    <select name="person_type" id="leavePersonType" required onchange="updatePersonList()">
+                        <option value="teacher">Teacher</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Person *</label>
+                    <select name="person_id" id="leavePersonId" required>
+                        <option value="">— Select Teacher —</option>
+                        <% teachers.forEach(t => { %><option value="<%= t.id %>" data-type="teacher"><%= t.full_name %></option><% }) %>
+                        <% staff.forEach(s => { %><option value="<%= s.id %>" data-type="staff" style="display:none"><%= s.full_name %></option><% }) %>
+                    </select>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Leave Type *</label>
+                        <select name="leave_type" required>
+                            <option value="Sick Leave">Sick Leave</option>
+                            <option value="Annual Leave">Annual Leave</option>
+                            <option value="Emergency Leave">Emergency Leave</option>
+                            <option value="Maternity Leave">Maternity Leave</option>
+                            <option value="Paternity Leave">Paternity Leave</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><!-- spacer --></div>
+                    <div class="form-group">
+                        <label>From Date *</label>
+                        <input type="date" name="from_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>To Date *</label>
+                        <input type="date" name="to_date" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Reason</label>
+                    <textarea name="reason" rows="3" placeholder="Describe the reason for leave..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('addLeaveModal')" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('sidebar-open');}
+    function openModal(id){document.getElementById(id).classList.add('active');}
+    function closeModal(id){document.getElementById(id).classList.remove('active');}
+    function updatePersonList(){
+        const type = document.getElementById('leavePersonType').value;
+        const sel = document.getElementById('leavePersonId');
+        sel.innerHTML = '<option value="">— Select —</option>';
+        document.querySelectorAll('#leavePersonId option[data-type]').forEach(o => {
+            o.style.display = o.dataset.type === type ? '' : 'none';
+        });
+        // Re-add all options (hidden ones too)
+        const allOpts = Array.from(document.querySelectorAll('[data-type]'));
+        sel.innerHTML = '<option value="">— Select —</option>';
+        allOpts.forEach(o => {
+            const opt = o.cloneNode(true);
+            opt.style.display = o.dataset.type === type ? '' : 'none';
+            sel.appendChild(opt);
+        });
+    }
+    document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)})});
+    setTimeout(()=>{document.querySelectorAll('.page-alert').forEach(el=>{el.style.animation='slideUp 0.3s ease forwards';setTimeout(()=>el.remove(),300)})},5000);
+
+    // Store all person options for dynamic filtering
+    const teacherOptions = [<% teachers.forEach(t => { %>{id:<%= t.id %>,name:'<%= t.full_name %>',type:'teacher'},<% }) %>];
+    const staffOptions = [<% staff.forEach(s => { %>{id:<%= s.id %>,name:'<%= s.full_name %>',type:'staff'},<% }) %>];
+
+    function updatePersonList(){
+        const type = document.getElementById('leavePersonType').value;
+        const sel = document.getElementById('leavePersonId');
+        sel.innerHTML = '<option value="">— Select —</option>';
+        const list = type === 'teacher' ? teacherOptions : staffOptions;
+        list.forEach(p => {
+            const o = document.createElement('option');
+            o.value = p.id;
+            o.textContent = p.name;
+            sel.appendChild(o);
+        });
+    }
+    </script>
+</body>
+</html>

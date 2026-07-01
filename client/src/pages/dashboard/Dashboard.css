@@ -1,0 +1,46 @@
+.dashboard-container { animation: fadeIn 0.3s ease; }
+.dashboard-greeting { margin-bottom: var(--spacing-xl); }
+.main-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
+.stat-box { background: var(--card-bg); border-radius: var(--radius-lg); padding: var(--spacing-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border); position: relative; overflow: hidden; transition: all var(--transition-base); }
+.stat-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--card-accent, var(--gradient-primary)); }
+.stat-box:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.stat-box-content { display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
+.stat-box-icon { width: 54px; height: 54px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.stat-box-info h3 { font-size: var(--font-size-4xl); font-weight: 800; color: var(--text-primary); line-height: 1; }
+.stat-box-info p { font-size: var(--font-size-sm); color: var(--text-secondary); font-weight: 500; margin-top: 4px; }
+.stat-box-link { display: flex; align-items: center; gap: 4px; font-size: var(--font-size-xs); font-weight: 600; color: var(--primary); text-decoration: none; }
+.stat-box-link:hover { gap: 8px; }
+.text-blue   .stat-box-icon, .text-blue   { background: var(--primary-alpha);   color: var(--primary); }
+.text-cyan   .stat-box-icon, .text-cyan   { background: var(--accent-alpha);    color: var(--accent); }
+.text-orange .stat-box-icon, .text-orange { background: var(--orange-alpha);    color: var(--orange); }
+.text-purple .stat-box-icon, .text-purple { background: var(--purple-alpha);    color: var(--purple); }
+.text-green  .stat-box-icon, .text-green  { background: var(--success-alpha);   color: var(--success); }
+.text-red    .stat-box-icon, .text-red    { background: var(--danger-alpha);    color: var(--danger); }
+.text-gray   .stat-box-icon, .text-gray   { background: var(--bg-secondary);    color: var(--text-secondary); }
+.text-teal   .stat-box-icon, .text-teal   { background: rgba(6,182,212,0.12);   color: #0891B2; }
+.dashboard-middle-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: var(--spacing-lg); }
+.dashboard-chart-card, .dashboard-list-card { padding: var(--spacing-xl); }
+.dashboard-chart-full { grid-column: 1 / -1; }
+.recent-logins-list { display: flex; flex-direction: column; gap: 4px; }
+.recent-login-item { display: flex; align-items: center; gap: var(--spacing-sm); padding: 8px; border-radius: var(--radius-sm); transition: background var(--transition-fast); }
+.recent-login-item:hover { background: var(--bg-secondary); }
+.login-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.login-status-dot.success { background: var(--success); }
+.login-status-dot.failed  { background: var(--danger); }
+.login-info { flex: 1; }
+.login-name { display: block; font-size: var(--font-size-sm); font-weight: 600; }
+.login-role { display: block; font-size: var(--font-size-xs); }
+.login-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.login-time { font-size: var(--font-size-xs); }
+.quick-actions-container { padding: var(--spacing-xl); }
+.quick-actions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--spacing-md); }
+.action-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: var(--spacing-md); border-radius: var(--radius-md); font-size: var(--font-size-sm); font-weight: 600; text-decoration: none; transition: all var(--transition-base); border: none; cursor: pointer; }
+.action-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.action-blue   { background: var(--primary-alpha);   color: var(--primary); }
+.action-green  { background: var(--success-alpha);   color: var(--success); }
+.action-cyan   { background: var(--accent-alpha);    color: var(--accent); }
+.action-purple { background: var(--purple-alpha);    color: var(--purple); }
+.action-orange { background: var(--orange-alpha);    color: var(--orange); }
+@media (max-width: 1200px) { .main-stats-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 900px)  { .main-stats-grid { grid-template-columns: repeat(2, 1fr); } .dashboard-middle-row { grid-template-columns: 1fr; } }
+@media (max-width: 480px)  { .main-stats-grid { grid-template-columns: 1fr; } }

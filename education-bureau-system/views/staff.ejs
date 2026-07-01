@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | TSMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="app-body">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo"><i class="fas fa-graduation-cap"></i><div><h2>TSMS</h2><span>Education Bureau</span></div></div>
+            <button class="sidebar-close" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-link"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+            <a href="/teachers" class="nav-link"><i class="fas fa-chalkboard-teacher"></i><span>Teachers</span></a>
+            <a href="/schools" class="nav-link"><i class="fas fa-school"></i><span>Schools</span></a>
+            <a href="/staff" class="nav-link active"><i class="fas fa-users-cog"></i><span>Staff</span></a>
+            <a href="/attendance" class="nav-link"><i class="fas fa-calendar-check"></i><span>Attendance</span></a>
+            <a href="/leaves" class="nav-link"><i class="fas fa-calendar-times"></i><span>Leaves</span></a>
+            <% if (user && user.role === 'admin') { %><a href="/users" class="nav-link"><i class="fas fa-user-shield"></i><span>Users</span></a><% } %>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info"><div class="user-avatar" style="background:<%= user ? user.avatar_color : '#10b981' %>"><%= user ? user.full_name.charAt(0).toUpperCase() : 'A' %></div><div class="user-details"><span class="user-name"><%= user ? user.full_name : 'Admin' %></span><span class="user-role"><%= user ? user.role : 'admin' %></span></div></div>
+            <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="top-bar-left"><button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button><div><h1>Staff Management</h1><p class="breadcrumb"><a href="/dashboard">Dashboard</a> / Staff</p></div></div>
+            <div class="top-bar-right" style="display:flex;gap:8px">
+                <a href="/staff/export?search=<%= search %>&status=<%= status %>" class="btn btn-outline" id="exportStaffBtn"><i class="fas fa-file-csv"></i> Export CSV</a>
+                <% if (user && canCreate('staff')) { %><button class="btn btn-primary" onclick="openModal('addModal')" id="addStaffBtn"><i class="fas fa-plus"></i> Add Staff</button><% } %>
+            </div>
+        </header>
+
+        <% if (success_msg && success_msg.length > 0) { %><div class="alert alert-success page-alert"><i class="fas fa-check-circle"></i><span><%= success_msg[0] %></span><button onclick="this.parentElement.remove()" class="alert-close">&times;</button></div><% } %>
+        <% if (error_msg && error_msg.length > 0) { %><div class="alert alert-error page-alert"><i class="fas fa-exclamation-circle"></i><span><%= error_msg[0] %></span><button onclick="this.parentElement.remove()" class="alert-close">&times;</button></div><% } %>
+
+        <div class="filter-bar">
+            <form method="GET" action="/staff" class="filter-form">
+                <div class="search-box"><i class="fas fa-search"></i><input type="text" name="search" placeholder="Search staff..." value="<%= search %>"></div>
+                <select name="status" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    <option value="Active" <%= status==='Active'?'selected':'' %>>Active</option>
+                    <option value="On Leave" <%= status==='On Leave'?'selected':'' %>>On Leave</option>
+                    <option value="Transferred" <%= status==='Transferred'?'selected':'' %>>Transferred</option>
+                    <option value="Retired" <%= status==='Retired'?'selected':'' %>>Retired</option>
+                </select>
+                <button type="submit" class="btn btn-outline"><i class="fas fa-filter"></i> Filter</button>
+            </form>
+            <div class="filter-info"><span class="badge"><%= total %> records found</span></div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>#</th><th>Full Name</th><th>Gender</th><th>Position</th><th>Department</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    <% if (staff.length > 0) { staff.forEach((s, i) => { %>
+                    <tr>
+                        <td><%= (page - 1) * 10 + i + 1 %></td>
+                        <td><div class="cell-with-avatar"><div class="mini-avatar" style="background:<%= s.gender==='Male'?'#3b82f6':'#ec4899' %>"><%= s.full_name.charAt(0) %></div><a href="/staff/<%= s.id %>" class="name-link"><%= s.full_name %></a></div></td>
+                        <td><%= s.gender %></td>
+                        <td><%= s.position %></td>
+                        <td><%= s.department %></td>
+                        <td><%= s.phone || '-' %></td>
+                        <td><span class="status-badge status-<%= s.status.toLowerCase().replace(' ','-') %>"><%= s.status %></span></td>
+                        <td class="actions-cell">
+                            <% if (user && canUpdate('staff')) { %><button class="btn-icon btn-edit" onclick='openEditModal(<%= JSON.stringify(s) %>)' title="Edit"><i class="fas fa-edit"></i></button><% } %>
+                            <% if (user && canDelete('staff')) { %><form action="/staff/<%= s.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('Delete this staff member?')"><button type="submit" class="btn-icon btn-delete" title="Delete"><i class="fas fa-trash"></i></button></form><% } %>
+                        </td>
+                    </tr>
+                    <% }) } else { %><tr><td colspan="8" class="empty-state"><i class="fas fa-inbox"></i><br>No staff found</td></tr><% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <% if (totalPages > 1) { %>
+        <div class="pagination">
+            <% if (page > 1) { %><a href="/staff?page=<%= page-1 %>&search=<%= search %>&status=<%= status %>" class="page-btn"><i class="fas fa-chevron-left"></i></a><% } %>
+            <% for(let p=1; p<=totalPages; p++) { %><a href="/staff?page=<%= p %>&search=<%= search %>&status=<%= status %>" class="page-btn <%= p===page?'page-active':'' %>"><%= p %></a><% } %>
+            <% if (page < totalPages) { %><a href="/staff?page=<%= page+1 %>&search=<%= search %>&status=<%= status %>" class="page-btn"><i class="fas fa-chevron-right"></i></a><% } %>
+        </div>
+        <% } %>
+    </main>
+
+    <!-- Add Modal -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal">
+            <div class="modal-header"><h2><i class="fas fa-user-plus"></i> Add New Staff</h2><button onclick="closeModal('addModal')" class="modal-close">&times;</button></div>
+            <form action="/staff" method="POST" class="modal-form">
+                <div class="form-grid">
+                    <div class="form-group"><label>Full Name *</label><input type="text" name="full_name" required></div>
+                    <div class="form-group"><label>Gender *</label><select name="gender" required><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                    <div class="form-group"><label>Position *</label><input type="text" name="position" required></div>
+                    <div class="form-group"><label>Department *</label><input type="text" name="department" required></div>
+                    <div class="form-group"><label>Phone</label><input type="text" name="phone"></div>
+                    <div class="form-group"><label>Email</label><input type="email" name="email"></div>
+                    <div class="form-group"><label>Hire Date *</label><input type="date" name="hire_date" required></div>
+                    <div class="form-group"><label>Salary</label><input type="number" name="salary" step="0.01"></div>
+                    <div class="form-group"><label>Experience (Years)</label><input type="number" name="experience_years"></div>
+                    <div class="form-group"><label>Status</label><select name="status"><option value="Active">Active</option><option value="On Leave">On Leave</option><option value="Transferred">Transferred</option><option value="Retired">Retired</option></select></div>
+                </div>
+                <div class="form-group full-width"><label>Notes</label><textarea name="notes" rows="2"></textarea></div>
+                <div class="modal-actions"><button type="button" onclick="closeModal('addModal')" class="btn btn-outline">Cancel</button><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Staff</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header"><h2><i class="fas fa-edit"></i> Edit Staff</h2><button onclick="closeModal('editModal')" class="modal-close">&times;</button></div>
+            <form id="editForm" method="POST" class="modal-form">
+                <div class="form-grid">
+                    <div class="form-group"><label>Full Name *</label><input type="text" name="full_name" id="edit_full_name" required></div>
+                    <div class="form-group"><label>Gender *</label><select name="gender" id="edit_gender" required><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                    <div class="form-group"><label>Position *</label><input type="text" name="position" id="edit_position" required></div>
+                    <div class="form-group"><label>Department *</label><input type="text" name="department" id="edit_department" required></div>
+                    <div class="form-group"><label>Phone</label><input type="text" name="phone" id="edit_phone"></div>
+                    <div class="form-group"><label>Email</label><input type="email" name="email" id="edit_email"></div>
+                    <div class="form-group"><label>Hire Date *</label><input type="date" name="hire_date" id="edit_hire_date" required></div>
+                    <div class="form-group"><label>Salary</label><input type="number" name="salary" id="edit_salary" step="0.01"></div>
+                    <div class="form-group"><label>Experience</label><input type="number" name="experience_years" id="edit_experience"></div>
+                    <div class="form-group"><label>Status</label><select name="status" id="edit_status"><option value="Active">Active</option><option value="On Leave">On Leave</option><option value="Transferred">Transferred</option><option value="Retired">Retired</option><option value="Terminated">Terminated</option></select></div>
+                </div>
+                <div class="form-group full-width"><label>Notes</label><textarea name="notes" id="edit_notes" rows="2"></textarea></div>
+                <div class="modal-actions"><button type="button" onclick="closeModal('editModal')" class="btn btn-outline">Cancel</button><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('sidebar-open');document.querySelector('.main-content').classList.toggle('main-shifted');}
+    function openModal(id){document.getElementById(id).classList.add('active');}
+    function closeModal(id){document.getElementById(id).classList.remove('active');}
+    function openEditModal(s){
+        document.getElementById('editForm').action='/staff/'+s.id+'/update';
+        document.getElementById('edit_full_name').value=s.full_name;
+        document.getElementById('edit_gender').value=s.gender;
+        document.getElementById('edit_position').value=s.position;
+        document.getElementById('edit_department').value=s.department;
+        document.getElementById('edit_phone').value=s.phone||'';
+        document.getElementById('edit_email').value=s.email||'';
+        document.getElementById('edit_hire_date').value=s.hire_date?new Date(s.hire_date).toISOString().split('T')[0]:'';
+        document.getElementById('edit_salary').value=s.salary||'';
+        document.getElementById('edit_experience').value=s.experience_years||'';
+        document.getElementById('edit_status').value=s.status;
+        document.getElementById('edit_notes').value=s.notes||'';
+        openModal('editModal');
+    }
+    document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)})});
+    setTimeout(()=>{document.querySelectorAll('.page-alert').forEach(el=>{el.style.animation='slideUp 0.3s ease forwards';setTimeout(()=>el.remove(),300)})},5000);
+    </script>
+</body>
+</html>

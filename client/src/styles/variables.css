@@ -1,0 +1,167 @@
+/* ============================================
+   Wachale Woreda Education Bureau
+   Professional Design System v2
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* ── Brand Colors ── */
+  --primary:       #1A56DB;
+  --primary-light: #3F83F8;
+  --primary-dark:  #1239A5;
+  --primary-alpha: rgba(26, 86, 219, 0.10);
+  --primary-alpha-sm: rgba(26, 86, 219, 0.06);
+
+  --secondary:       #0E9F6E;
+  --secondary-light: #31C48D;
+  --secondary-dark:  #046C4E;
+  --secondary-alpha: rgba(14, 159, 110, 0.10);
+
+  --accent:       #7E3AF2;
+  --accent-light: #9061F9;
+  --accent-alpha: rgba(126, 58, 242, 0.10);
+
+  /* ── Semantic Colors ── */
+  --success:       #057A55;
+  --success-light: #0E9F6E;
+  --success-alpha: rgba(5, 122, 85, 0.10);
+  --warning:       #C27803;
+  --warning-light: #E3A008;
+  --warning-alpha: rgba(194, 120, 3, 0.10);
+  --danger:        #C81E1E;
+  --danger-light:  #E02424;
+  --danger-alpha:  rgba(200, 30, 30, 0.10);
+  --info:          #0369A1;
+  --info-light:    #0EA5E9;
+  --info-alpha:    rgba(3, 105, 161, 0.10);
+  --orange:        #B45309;
+  --orange-alpha:  rgba(180, 83, 9, 0.10);
+  --purple:        #6D28D9;
+  --purple-alpha:  rgba(109, 40, 217, 0.10);
+
+  /* ── Page Background (deep navy-slate) ── */
+  --bg:             #EEF2F7;
+  --bg-secondary:   #E2E8F2;
+  --bg-tertiary:    #CBD5E1;
+  --bg-page:        #EEF2F7;
+
+  /* ── Surface (cards, panels) ── */
+  --card-bg:        #FFFFFF;
+  --card-border:    rgba(0,0,0,0.06);
+  --card-shadow:    0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+
+  /* ── Sidebar ── */
+  --sidebar-bg:      #0F1B35;
+  --sidebar-surface: #172342;
+  --sidebar-hover:   rgba(255,255,255,0.06);
+  --sidebar-active:  #1A56DB;
+  --sidebar-border:  rgba(255,255,255,0.07);
+
+  /* ── Navbar ── */
+  --navbar-bg:     #FFFFFF;
+  --navbar-border: rgba(0,0,0,0.07);
+  --navbar-shadow: 0 1px 8px rgba(0,0,0,0.07);
+
+  /* ── Text ── */
+  --text-primary:   #0F172A;
+  --text-secondary: #475569;
+  --text-muted:     #94A3B8;
+  --text-white:     #FFFFFF;
+  --text-inverse:   #F8FAFC;
+
+  /* ── Borders ── */
+  --border:       #E2E8F0;
+  --border-light: #F1F5F9;
+  --border-focus: #1A56DB;
+
+  /* ── Shadows ── */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+  --shadow-xl: 0 20px 48px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.07);
+  --shadow-primary: 0 6px 20px rgba(26,86,219,0.30);
+
+  /* ── Spacing ── */
+  --spacing-xs:  4px;
+  --spacing-sm:  8px;
+  --spacing-md:  16px;
+  --spacing-lg:  24px;
+  --spacing-xl:  32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+
+  /* ── Radius ── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   18px;
+  --radius-2xl:  24px;
+  --radius-full: 9999px;
+
+  /* ── Typography ── */
+  --font-family:        'Inter', 'Plus Jakarta Sans', sans-serif;
+  --font-display:       'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-size-xs:       11px;
+  --font-size-sm:       12px;
+  --font-size-base:     13px;
+  --font-size-md:       14px;
+  --font-size-lg:       15px;
+  --font-size-xl:       17px;
+  --font-size-2xl:      20px;
+  --font-size-3xl:      24px;
+  --font-size-4xl:      28px;
+  --font-size-5xl:      32px;
+  --font-size-6xl:      40px;
+
+  /* ── Transitions ── */
+  --transition-fast:   120ms ease;
+  --transition-base:   220ms ease;
+  --transition-slow:   380ms ease;
+  --transition-spring: 280ms cubic-bezier(0.34,1.56,0.64,1);
+
+  /* ── Layout ── */
+  --sidebar-width:          256px;
+  --sidebar-collapsed-width: 68px;
+  --navbar-height:           62px;
+  --content-max-width:       1440px;
+
+  /* ── Z-index ── */
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-sidebar:  300;
+  --z-navbar:   400;
+  --z-modal:    500;
+  --z-toast:    600;
+  --z-tooltip:  700;
+
+  /* ── Gradients ── */
+  --gradient-primary:   linear-gradient(135deg, #1A56DB 0%, #3F83F8 100%);
+  --gradient-secondary: linear-gradient(135deg, #0E9F6E 0%, #31C48D 100%);
+  --gradient-warning:   linear-gradient(135deg, #C27803 0%, #E3A008 100%);
+  --gradient-danger:    linear-gradient(135deg, #C81E1E 0%, #E02424 100%);
+  --gradient-purple:    linear-gradient(135deg, #6D28D9 0%, #9061F9 100%);
+  --gradient-sidebar:   linear-gradient(180deg, #0F1B35 0%, #0A1628 100%);
+  --gradient-dark:      linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+}
+
+/* ── Dark Mode ── */
+[data-theme="dark"] {
+  --bg:           #0B1120;
+  --bg-secondary: #111827;
+  --bg-tertiary:  #1F2937;
+  --bg-page:      #0B1120;
+  --card-bg:      #111827;
+  --card-border:  rgba(255,255,255,0.06);
+  --navbar-bg:    #111827;
+  --navbar-border:rgba(255,255,255,0.07);
+  --border:       #1F2937;
+  --border-light: #111827;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted:   #475569;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.6);
+}

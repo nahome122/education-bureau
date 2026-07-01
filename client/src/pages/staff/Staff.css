@@ -1,0 +1,15 @@
+.staff-page { animation: fadeIn 0.3s ease; }
+.filters-row { display: flex; gap: var(--spacing-sm); align-items: center; flex-wrap: wrap; }
+.user-cell { display: flex; align-items: center; gap: var(--spacing-sm); }
+.action-btns { display: flex; gap: 4px; }
+.btn-danger-icon { color: var(--danger) !important; border-color: var(--danger-alpha) !important; }
+.btn-danger-icon:hover { background: var(--danger-alpha) !important; }
+.id-code { font-family: monospace; font-size: 12px; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px; }
+.spinner-sm { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+.delete-icon-wrap { width: 64px; height: 64px; background: var(--danger-alpha); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--danger); margin: 0 auto var(--spacing-md); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Own-row highlight ── */
+.own-row-highlight { background: rgba(22,163,74,0.04) !important; }
+.own-row-highlight:hover { background: rgba(22,163,74,0.08) !important; }
+.own-row-badge { display: inline-flex; align-items: center; margin-left: 6px; padding: 1px 6px; border-radius: 9999px; font-size: 9px; font-weight: 700; background: rgba(22,163,74,0.12); color: #16a34a; letter-spacing: 0.3px; vertical-align: middle; }
