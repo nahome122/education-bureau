@@ -186,12 +186,12 @@ INSERT IGNORE INTO departments (id, name, head, description, status, color) VALU
 (6,'Finance','Ato Samuel Girma','Accounting & Finance','Active','#06B6D4');
 
 -- ============================================================
--- Seed: Admin user  (password: Admin@1234)
+-- Seed: Admin user  (password: Employee@123)
 -- ============================================================
--- password: "password"  ← change in production
+-- password: "Employee@123"  ← secure password
 INSERT IGNORE INTO users (id, full_name, username, email, phone, password_hash, role_id, status)
-VALUES (1, 'System Administrator', 'admin', 'admin@tsms.gov.et', '+251911000001',
-  '$2a$12$U5o/fJy.sJZvADGi8DbsDuaiozNabGL9Nb.1V9dPCc26ic0wj3Zqe', 1, 'Active');
+VALUES (1, 'Nahom Eshetu', 'belete.guta', 'nahom@tsms.gov.et', '+251911000001',
+  '$2a$12$qUobE4SBZK7rGL4EuidjcO5SIgzfmakcobQ3VxImVyi0TERrZGRAO', 1, 'Active');
 
 -- ============================================================
 -- Seed: Sample users for each role  (password: "password")

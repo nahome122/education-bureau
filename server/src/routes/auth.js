@@ -6,12 +6,63 @@ const { pool } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 
-const generateToken = (user) =>
-  jwt.sign(
-    { id: user.id, username: user.username, role: user.role_name },
-    process.env.JWT_SECRET,
+const normalizeUsername = (value = '') => (value || '').trim().toLowerCase();
+
+const makeEmployeeUsername = (name = '') => {
+  const parts = (name || '').trim().toLowerCase().split(/\s+/);
+  if (parts.length <= 1) return parts[0] || '';
+  return `${parts[0]}.${parts[parts.length - 1]}`;
+};
+
+const getEmployeeDefaultPassword = () => process.env.EMPLOYEE_DEFAULT_PASSWORD || 'Employee@123';
+
+const buildEmployeeAuthUser = (employee, username) => ({
+  id: `emp_${employee.type}_${employee.id}`,
+  full_name: employee.name,
+  username,
+  email: employee.email || '',
+  phone: employee.phone || '',
+  role_id: null,
+  role_name: employee.type === 'teacher' ? 'Teacher' : 'Staff',
+  role_label: employee.type === 'teacher' ? 'Teacher' : 'Staff',
+  school_id: employee.school_id || null,
+  school_name: employee.school_name || '',
+  status: employee.status,
+  permissions: ['dashboard', 'profile', 'id-cards', 'attendance'],
+  employee_type: employee.type,
+  employee_id: employee.id,
+  employee_code: employee.emp_code,
+  user_source: 'employee',
+});
+
+const generateToken = (user) => {
+  const permissions = Array.isArray(user.permissions)
+    ? user.permissions
+    : JSON.parse(user.permissions || '[]');
+
+  return jwt.sign(
+    {
+      id: user.id,
+      username: user.username,
+      role: user.role_name,
+      role_name: user.role_name,
+      role_label: user.role_label,
+      full_name: user.full_name,
+      email: user.email,
+      phone: user.phone,
+      school_id: user.school_id,
+      school_name: user.school_name,
+      permissions,
+      status: user.status,
+      user_source: user.user_source || 'system',
+      employee_type: user.employee_type,
+      employee_id: user.employee_id,
+      employee_code: user.employee_code,
+    },
+    process.env.JWT_SECRET || 'dev-secret',
     { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
   );
+};
 
 // POST /api/auth/login
 router.post(
@@ -27,17 +78,40 @@ router.post(
     const ua = req.headers['user-agent'] || '';
 
     try {
+      const normalizedUsername = normalizeUsername(username);
       const [rows] = await pool.query(
         `SELECT u.*, r.name AS role_name, r.label AS role_label, r.permissions,
                 s.name AS school_name
          FROM users u
          JOIN roles r ON r.id = u.role_id
          LEFT JOIN schools s ON s.id = u.school_id
-         WHERE u.username = ?`,
+         WHERE LOWER(u.username) = LOWER(?)`,
         [username]
       );
 
-      const user = rows[0];
+      let user = rows[0];
+      let authMode = 'system';
+
+      if (!user) {
+        const [teacherRows] = await pool.query(
+          `SELECT t.id, t.tid AS emp_code, t.name, t.email, t.phone, t.status, t.school_id, s.name AS school_name
+           FROM teachers t
+           LEFT JOIN schools s ON s.id = t.school_id`
+        );
+        const [staffRows] = await pool.query(
+          `SELECT t.id, t.sid AS emp_code, t.name, t.email, t.phone, t.status, t.school_id, s.name AS school_name
+           FROM staff t
+           LEFT JOIN schools s ON s.id = t.school_id`
+        );
+
+        const employee = [...teacherRows.map((row) => ({ ...row, type: 'teacher' })), ...staffRows.map((row) => ({ ...row, type: 'staff' }))]
+          .find((row) => normalizeUsername(makeEmployeeUsername(row.name)) === normalizedUsername);
+
+        if (employee) {
+          authMode = 'employee';
+          user = buildEmployeeAuthUser(employee, normalizedUsername);
+        }
+      }
 
       // Log attempt
       const logAttempt = async (status) => {
@@ -57,7 +131,13 @@ router.post(
         return res.status(403).json({ success: false, message: 'Your account is deactivated. Contact the Administrator.' });
       }
 
-      const valid = await bcrypt.compare(password, user.password_hash);
+      let valid = false;
+      if (authMode === 'employee') {
+        valid = password === getEmployeeDefaultPassword();
+      } else {
+        valid = await bcrypt.compare(password, user.password_hash);
+      }
+
       if (!valid) {
         await logAttempt('failed');
         return res.status(401).json({ success: false, message: 'Invalid username or password.' });
@@ -69,7 +149,9 @@ router.post(
 
       const token = generateToken(user);
 
-      const permissions = JSON.parse(user.permissions || '[]');
+      const permissions = Array.isArray(user.permissions)
+        ? user.permissions
+        : JSON.parse(user.permissions || '[]');
 
       return res.json({
         success: true,
@@ -86,6 +168,9 @@ router.post(
           school_id:   user.school_id,
           school_name: user.school_name,
           permissions,
+          employee_type: user.employee_type,
+          employee_id: user.employee_id,
+          employee_code: user.employee_code,
         },
       });
     } catch (err) {

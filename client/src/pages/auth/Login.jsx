@@ -44,23 +44,7 @@ const Login = () => {
 
   return (
     <div className="login-wrapper">
-      {/* Floating decorative blobs */}
-      <div className="login-blob login-blob-1" />
-      <div className="login-blob login-blob-2" />
-      <div className="login-blob login-blob-3" />
-
-      {/* Floating leaves / petals */}
-      <div className="leaf leaf-1" />
-      <div className="leaf leaf-2" />
-      <div className="leaf leaf-3" />
-      <div className="leaf leaf-4" />
-      <div className="leaf leaf-5" />
-      <div className="leaf leaf-6" />
-
-      {/* Main card */}
       <div className="login-card">
-
-        {/* Left — Form panel */}
         <div className="login-form-panel">
           <div className="login-form-inner">
 
@@ -179,30 +163,6 @@ const Login = () => {
 
           </div>
         </div>
-
-        {/* Right — Illustration panel */}
-        <div className="login-illustration-panel">
-          <div className="login-illus-content">
-            <div className="login-illus-icon">
-              <MdSchool />
-            </div>
-            <h2 className="login-illus-title">
-              Wachale Woreda<br />Education Bureau
-            </h2>
-            <p className="login-illus-subtitle">
-              Teacher &amp; Staff Management System
-            </p>
-          </div>
-
-          {/* Decorative floating circles */}
-          <div className="illus-circle illus-circle-1" />
-          <div className="illus-circle illus-circle-2" />
-          <div className="illus-circle illus-circle-3" />
-          <div className="illus-dots">
-            {[...Array(16)].map((_, i) => <span key={i} className="illus-dot" />)}
-          </div>
-        </div>
-
       </div>
     </div>
   );

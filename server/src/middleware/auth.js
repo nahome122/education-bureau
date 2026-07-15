@@ -10,7 +10,15 @@ const authenticate = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
+
+    if (decoded.user_source === 'employee') {
+      req.user = {
+        ...decoded,
+        permissions: decoded.permissions || [],
+      };
+      return next();
+    }
 
     // Fetch fresh user from DB
     const [rows] = await pool.query(

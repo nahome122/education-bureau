@@ -21,7 +21,7 @@ export const mockDashboardStats = {
     { month: 'Jun 2026', total: 218, present: 196 },
   ],
   recentLogins: [
-    { username: 'admin',             full_name: 'System Administrator', role: 'Administrator',    status: 'success', ip_address: '127.0.0.1',  created_at: new Date().toISOString() },
+    { username: 'belete.guta',       full_name: 'Nahom Eshetu',      role: 'Administrator',    status: 'success', ip_address: '127.0.0.1',  created_at: new Date().toISOString() },
     { username: 'schoolmanager',     full_name: 'Dawit Bekele',         role: 'School Manager',   status: 'success', ip_address: '192.168.1.2', created_at: new Date(Date.now() - 3600000).toISOString() },
     { username: 'attendanceofficer', full_name: 'Sara Tesfaye',         role: 'Att. Officer',     status: 'success', ip_address: '192.168.1.3', created_at: new Date(Date.now() - 7200000).toISOString() },
     { username: 'baduser',           full_name: null,                   role: null,               status: 'failed',  ip_address: '10.0.0.5',   created_at: new Date(Date.now() - 10800000).toISOString() },
@@ -79,7 +79,7 @@ export const mockPositions = [
 ];
 
 export const mockUsers = [
-  { id: 1, full_name: 'System Administrator', username: 'admin',             email: 'admin@tsms.gov.et',   phone: '+251911000001', role_id: 1, role_name: 'Administrator',     role_label: 'Administrator',     school_name: 'District Office',        status: 'Active',   last_login: new Date().toISOString() },
+  { id: 1, full_name: 'Nahom Eshetu', username: 'belete.guta',             email: 'nahom@tsms.gov.et',   phone: '+251911000001', role_id: 1, role_name: 'Administrator',     role_label: 'Administrator',     school_name: 'District Office',        status: 'Active',   last_login: new Date().toISOString() },
   { id: 2, full_name: 'Dawit Bekele',         username: 'schoolmanager',     email: 'manager@tsms.gov.et', phone: '+251922000002', role_id: 2, role_name: 'SchoolManager',     role_label: 'School Manager',    school_name: 'Wachale Primary School', status: 'Active',   last_login: new Date(Date.now() - 3600000).toISOString() },
   { id: 3, full_name: 'Sara Tesfaye',         username: 'attendanceofficer', email: 'officer@tsms.gov.et', phone: '+251933000003', role_id: 3, role_name: 'AttendanceOfficer', role_label: 'Attendance Officer', school_name: 'Wachale Primary School', status: 'Active',   last_login: new Date(Date.now() - 7200000).toISOString() },
   { id: 4, full_name: 'Yohannes Girma',       username: 'viewer',            email: 'viewer@tsms.gov.et',  phone: '+251944000004', role_id: 4, role_name: 'Viewer',            role_label: 'Viewer',            school_name: 'Wachale Primary School', status: 'Active',   last_login: null },

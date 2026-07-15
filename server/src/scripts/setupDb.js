@@ -25,12 +25,12 @@ async function setup() {
     console.log('✅  Database schema created and seeded successfully.');
     console.log('');
     console.log('🔑  Default credentials:');
-    console.log('   Admin          → username: admin         | password: password');
-    console.log('   School Manager → username: schoolmanager | password: password');
+    console.log('   Admin          → username: belete.guta    | password: Employee@123');
+    console.log('   School Manager → username: schoolmanager  | password: password');
     console.log('   Att. Officer   → username: attendanceofficer | password: password');
-    console.log('   Viewer         → username: viewer        | password: password');
+    console.log('   Viewer         → username: viewer         | password: password');
     console.log('');
-    console.log('⚠️   The seeded password hash is for "password" — change immediately in production!');
+    console.log('⚠️   The seeded password hash is for "password" for other users — change immediately in production!');
   } catch (err) {
     console.error('❌  Error running schema:', err.message);
   }

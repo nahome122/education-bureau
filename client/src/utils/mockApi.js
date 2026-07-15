@@ -36,10 +36,10 @@ const save = (key, value) => {
 
 // ─── Default password store ──────────────────────────────────────────────────
 const DEFAULT_PASSWORDS = {
-  admin:             'password123',
-  schoolmanager:     'password123',
-  attendanceofficer: 'password123',
-  viewer:            'password123',
+  'belete.guta':     'Employee@123',
+  schoolmanager:     'password',
+  attendanceofficer: 'password',
+  viewer:            'password',
 };
 
 // ─── Initialize store from localStorage (or seed data on first run) ──────────
