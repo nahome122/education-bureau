@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Teacher & Staff Management System",
   "scripts": {
+    "start": "npm run start --prefix server",
     "server": "npm run dev --prefix server",
     "client": "npm run dev --prefix client",
     "setup-db": "node server/src/scripts/setupDb.js"
