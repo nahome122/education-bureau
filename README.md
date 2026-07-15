@@ -51,14 +51,23 @@ npm run dev
 
 ## Default Login Credentials
 
-> **All passwords are `password`** — Change them immediately after first login.
+> **Administrator** uses `Employee@123` — Other users use `password` — Change them immediately after first login.
 
 | Role | Username | Password |
 |------|----------|----------|
-| Administrator | `admin` | `password` |
+| Administrator | `belete.guta` | `Employee@123` |
 | School Manager | `schoolmanager` | `password` |
 | Attendance Officer | `attendanceofficer` | `password` |
 | Viewer | `viewer` | `password` |
+
+---
+
+## Administrator Info
+
+- **Name:** Nahom Eshetu
+- **Username:** belete.guta
+- **Password:** Employee@123
+- **Email:** nahom@tsms.gov.et
 
 ---
 
