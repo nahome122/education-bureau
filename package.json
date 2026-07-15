@@ -4,6 +4,7 @@
   "description": "Teacher & Staff Management System",
   "scripts": {
     "start": "npm run start --prefix server",
+    "start:both": "concurrently \"npm run start --prefix server\" \"npm run dev --prefix client\"",
     "server": "npm run dev --prefix server",
     "client": "npm run dev --prefix client",
     "setup-db": "node server/src/scripts/setupDb.js"
@@ -11,5 +12,8 @@
   "dependencies": {
     "dotenv": "^17.4.2",
     "mysql2": "^3.22.5"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }
