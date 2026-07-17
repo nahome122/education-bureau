@@ -19,7 +19,14 @@ const testConnection = async () => {
     console.log('✅  MySQL connected successfully');
     conn.release();
   } catch (err) {
-    console.error('❌  MySQL connection failed:', err.message);
+    console.error('❌  MySQL connection failed:');
+    console.error('   host     =', process.env.DB_HOST || 'localhost');
+    console.error('   port     =', process.env.DB_PORT || '3306');
+    console.error('   user     =', process.env.DB_USER || 'root');
+    console.error('   database =', process.env.DB_NAME || 'tsms_db');
+    console.error('   code     =', err.code || 'N/A');
+    console.error('   message  =', err.message || 'N/A');
+    console.error(err);
     process.exit(1);
   }
 };
