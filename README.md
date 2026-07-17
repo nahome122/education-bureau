@@ -49,6 +49,27 @@ npm run dev
 
 ---
 
+## Deploy to Railway
+
+1. Ensure the root `package.json` has a `start` script (it runs the backend):
+
+	```json
+	"start": "node server/src/index.js"
+	```
+
+2. Add a `DATABASE_URL` environment variable in Railway (format):
+
+	```bash
+	mysql://<user>:<password>@<host>:3306/<database>
+	```
+
+3. Railway will use the `Procfile` (root) or `railway.json` to run `npm start`.
+
+4. If your database is managed by Railway, attach the MySQL plugin and copy the provided `DATABASE_URL`.
+
+
+---
+
 ## Default Login Credentials
 
 > **Administrator** uses `Employee@123` — Other users use `password` — Change them immediately after first login.

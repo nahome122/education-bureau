@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Teacher & Staff Management System",
   "scripts": {
-    "start": "npm run start --prefix server",
+    "start": "node server/src/index.js",
     "start:both": "concurrently \"npm run start --prefix server\" \"npm run dev --prefix client\"",
     "server": "npm run dev --prefix server",
     "client": "npm run dev --prefix client",
