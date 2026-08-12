@@ -1,0 +1,237 @@
+.attendance-summary-page {
+  animation: fadeIn 0.3s ease;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.header-actions .form-group {
+  margin: 0;
+}
+
+/* Grid for stat cards */
+.grid-5 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+/* Table styling */
+.table-container {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.data-table th {
+  background-color: var(--bg-secondary);
+  padding: var(--spacing-md);
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.data-table td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.data-table tbody tr:hover {
+  background-color: var(--bg-hover);
+}
+
+.data-table tr:last-child td {
+  border-bottom: 2px solid var(--border-color);
+}
+
+.att-summary-total {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+/* Badge styling */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge-success {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+.badge-danger {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #DC2626;
+}
+
+.badge-warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #D97706;
+}
+
+.badge-info {
+  background-color: rgba(139, 92, 246, 0.15);
+  color: #7C3AED;
+}
+
+/* Comparison bars */
+.att-stat-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.att-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.att-stat-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.att-stat-bar {
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.75rem;
+  min-width: 60px;
+  font-weight: 700;
+  color: white;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.att-stat-bar:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.att-stat-present {
+  background-color: #10B981;
+}
+
+.att-stat-absent {
+  background-color: #EF4444;
+}
+
+.att-stat-percent {
+  font-weight: 700;
+}
+
+/* Status Distribution Grid */
+.att-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.att-stat-badge {
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: var(--bg-secondary);
+  border-left: 4px solid #3B82F6;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.att-stat-badge-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.att-stat-badge-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.att-stat-badge-percent {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Text color utilities */
+.text-success {
+  color: #059669;
+}
+
+.text-danger {
+  color: #DC2626;
+}
+
+.text-warning {
+  color: #D97706;
+}
+
+.text-info {
+  color: #7C3AED;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions .form-group {
+    width: 100%;
+  }
+
+  .header-actions .form-control,
+  .header-actions .btn {
+    width: 100%;
+  }
+
+  .grid-5 {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .data-table {
+    font-size: 0.8rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.5rem;
+  }
+
+  .att-stat-badge-value {
+    font-size: 1.5rem;
+  }
+}

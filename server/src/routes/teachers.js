@@ -17,6 +17,7 @@ router.get('/', authenticate, async (req, res) => {
     const page   = parseInt(req.query.page  || '1');
     const limit  = parseInt(req.query.limit || '10');
     const offset = (page - 1) * limit;
+    const sortOrder = req.query.sort === 'az' ? 'az' : 'recent';
 
     let sql = `
       SELECT t.*, d.name AS department_name, s.name AS school_name
@@ -33,7 +34,7 @@ router.get('/', authenticate, async (req, res) => {
     const [countRows] = await pool.query(`SELECT COUNT(*) AS total FROM (${sql}) AS t2`, params);
     const total = countRows[0].total;
 
-    sql += ' ORDER BY t.created_at DESC LIMIT ? OFFSET ?';
+    sql += sortOrder === 'az' ? ' ORDER BY t.name ASC LIMIT ? OFFSET ?' : ' ORDER BY t.created_at DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
 
     const [rows] = await pool.query(sql, params);
@@ -56,7 +57,7 @@ router.post('/', authenticate, authorize(ADMIN, MANAGER),
     const {
       tid, name, gender, dob, phone, email, qualification,
       department_id, school_id, subjects, position, type,
-      salary, experience, joining, status
+      salary, experience, joining, status, semester1_score, semester2_score
     } = req.body;
     try {
       const [dup] = await pool.query('SELECT id FROM teachers WHERE tid = ?', [tid]);
@@ -64,12 +65,13 @@ router.post('/', authenticate, authorize(ADMIN, MANAGER),
 
       const [result] = await pool.query(
         `INSERT INTO teachers (tid, name, gender, dob, phone, email, qualification,
-          department_id, school_id, subjects, position, type, salary, experience, joining, status)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+          department_id, school_id, subjects, position, type, salary, experience, joining, status, semester1_score, semester2_score)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         [tid, name, gender || 'Male', dob || null, phone || null, email || null,
          qualification || null, department_id || null, school_id || null,
          JSON.stringify(subjects || []), position || null, type || 'Permanent',
-         salary || 0, experience || 0, joining || null, status || 'Active']
+         salary || 0, experience || 0, joining || null, status || 'Active',
+         semester1_score || 0, semester2_score || 0]
       );
       return res.status(201).json({ success: true, message: 'Teacher added.', id: result.insertId });
     } catch (err) {
@@ -85,7 +87,7 @@ router.put('/:id', authenticate, authorize(ADMIN, MANAGER), async (req, res) => 
   const {
     tid, name, gender, dob, phone, email, qualification,
     department_id, school_id, subjects, position, type,
-    salary, experience, joining, status
+    salary, experience, joining, status, semester1_score, semester2_score
   } = req.body;
   try {
     const [dup] = await pool.query('SELECT id FROM teachers WHERE tid = ? AND id != ?', [tid, id]);
@@ -93,11 +95,12 @@ router.put('/:id', authenticate, authorize(ADMIN, MANAGER), async (req, res) => 
 
     await pool.query(
       `UPDATE teachers SET tid=?,name=?,gender=?,dob=?,phone=?,email=?,qualification=?,
-        department_id=?,school_id=?,subjects=?,position=?,type=?,salary=?,experience=?,joining=?,status=?,updated_at=NOW()
+        department_id=?,school_id=?,subjects=?,position=?,type=?,salary=?,experience=?,joining=?,status=?,semester1_score=?,semester2_score=?,updated_at=NOW()
        WHERE id=?`,
       [tid, name, gender, dob || null, phone || null, email || null, qualification || null,
        department_id || null, school_id || null, JSON.stringify(subjects || []),
-       position || null, type, salary || 0, experience || 0, joining || null, status, id]
+       position || null, type, salary || 0, experience || 0, joining || null, status,
+       semester1_score || 0, semester2_score || 0, id]
     );
     return res.json({ success: true, message: 'Teacher updated.' });
   } catch (err) {

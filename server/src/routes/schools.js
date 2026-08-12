@@ -49,10 +49,10 @@ router.post('/', authenticate, authorize(ADMIN),
       if (dup.length) return res.status(409).json({ success: false, message: 'School code already exists.' });
 
       const [result] = await pool.query(
-        `INSERT INTO schools (code, name, principal, phone, email, address, type, status, students,teachers,)
+        `INSERT INTO schools (code, name, principal, phone, email, address, type, status, students)
          VALUES (?,?,?,?,?,?,?,?,?)`,
         [code, name, principal || null, phone || null, email || null, address || null,
-         type || 'Primary', status || 'Active', students || 0,teachers || null,]
+         type || 'Primary', status || 'Active', students || 0]
       );
       return res.status(201).json({ success: true, message: 'School created.', id: result.insertId });
     } catch (err) {

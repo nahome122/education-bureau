@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authLogin as callLogin, changeEmployeePw } from '../utils/apiCall';
+import { authLogin as callLogin, changeEmployeePw, changeUsernameApi } from '../utils/apiCall';
 import api from '../utils/api';
 
 const AuthContext = createContext(null);
@@ -17,17 +17,20 @@ export const AuthProvider = ({ children }) => {
   const [isMock,  setIsMock]  = useState(false);
 
   const applyEmpProfileOverride = useCallback((u) => {
-    if (!u?.emp_type || u?.emp_id == null) return u;
+    const empType = u?.employee_type || u?.emp_type;
+    const empId   = u?.employee_id   || u?.emp_id;
+    if (!empType || empId == null) return u;
     try {
-      const saved = localStorage.getItem(`tsms_emp_profile_${u.emp_type}_${u.emp_id}`);
+      const saved = localStorage.getItem(`tsms_emp_profile_${empType}_${empId}`);
       if (!saved) return u;
       const override = JSON.parse(saved);
-      const { full_name, phone, email, gender, dob, address, bio } = override;
-      return { ...u, full_name, phone, email, gender, dob, address, bio };
+      const { full_name, phone, email, gender, dob, address, bio, username } = override;
+      return { ...u, full_name, phone, email, gender, dob, address, bio, ...(username ? { username } : {}) };
     } catch {
       return u;
     }
   }, []);
+
 
   // Re-hydrate session on mount
   useEffect(() => {
@@ -101,15 +104,43 @@ export const AuthProvider = ({ children }) => {
     if (inSession) sessionStorage.setItem('tsms_user', json);
     // For employees: also save their profile overrides to localStorage
     // so changes survive tab closes (sessionStorage clears on tab close)
-    if (updatedUser?.emp_type && updatedUser?.emp_id) {
+    // Note: employee objects use employee_type/employee_id (from JWT / buildEmployeeAuthUser)
+    const empType = updatedUser?.employee_type || updatedUser?.emp_type;
+    const empId   = updatedUser?.employee_id   || updatedUser?.emp_id;
+    if (empType && empId != null) {
       localStorage.setItem(
-        `tsms_emp_profile_${updatedUser.emp_type}_${updatedUser.emp_id}`,
+        `tsms_emp_profile_${empType}_${empId}`,
         json
       );
     }
     // Update React state last (triggers re-render)
     setUser(updatedUser);
   }, []);
+
+  const changeUsername = useCallback(async (new_username) => {
+    if (!new_username || new_username.length < 3) {
+      return { success: false, message: 'Username must be at least 3 characters.' };
+    }
+    const trimmed = new_username.trim().toLowerCase();
+    if (trimmed === user?.username?.toLowerCase()) {
+      return { success: false, message: 'New username must be different from current.' };
+    }
+
+    try {
+      // Routes through call() — uses real backend if up, mock if down.
+      // Mock path also updates the passwords store so login works immediately.
+      const { data } = await changeUsernameApi(user, trimmed);
+      if (data.success) {
+        const updatedUser = data.user
+          ? { ...user, ...data.user }
+          : { ...user, username: trimmed };
+        refreshUser(updatedUser);
+      }
+      return data;
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to change username.' };
+    }
+  }, [user, refreshUser]);
 
   const hasPermission = useCallback((perm) => {
     if (!user) return false;
@@ -136,7 +167,7 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{
       user, token, loading, isMock,
-      login, logout, changePassword, refreshUser,
+      login, logout, changePassword, changeUsername, refreshUser,
       hasPermission, canAccess,
       isAuthenticated: !!user,
       isAdmin, isSchoolManager, isOfficer, isViewer, isEmployee, isOwnRecord,

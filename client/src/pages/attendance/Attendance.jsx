@@ -32,6 +32,11 @@ const Attendance = () => {
   const [records,   setRecords]   = useState({});
   const [loading,   setLoading]   = useState(false);
   const [saving,    setSaving]    = useState(false);
+  
+  // Employee view specific state
+  const [monthYear, setMonthYear] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM format
+  const [allAttendance, setAllAttendance] = useState([]);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
 
   // Load schools (not needed for employee view, but harmless)
   useEffect(() => {
@@ -97,6 +102,53 @@ const Attendance = () => {
     fetchEmployees({ date: val, type, school_id: schoolId });
   };
 
+  // Fetch all attendance records for employee for a given month
+  const fetchAllMonthAttendance = useCallback(async (monthYearStr) => {
+    if (!isEmployee || !user?.emp_id) return;
+    
+    setAttendanceLoading(true);
+    try {
+      // Get all days in the month
+      const [year, month] = monthYearStr.split('-');
+      const firstDay = new Date(year, parseInt(month) - 1, 1);
+      const lastDay = new Date(year, parseInt(month), 0);
+      const daysInMonth = lastDay.getDate();
+      
+      // Fetch data for several key dates in the month (approximation)
+      // In production, you'd have a dedicated API endpoint
+      const records = [];
+      const promises = [];
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${month}-${String(day).padStart(2, '0')}`;
+        promises.push(
+          getAttendance({ date: dateStr, type: user.emp_type, limit: 1000 })
+            .then(({ data }) => {
+              if (data.success && data.data) {
+                const myRec = data.data.find(r => r.id === user.emp_id);
+                if (myRec) {
+                  records.push(myRec);
+                }
+              }
+            })
+            .catch(() => {})
+        );
+      }
+      
+      await Promise.all(promises);
+      setAllAttendance(records);
+    } catch (err) {
+      console.error('Failed to fetch attendance:', err);
+    }
+    setAttendanceLoading(false);
+  }, [isEmployee, user]);
+
+  useEffect(() => {
+    if (isEmployee) {
+      fetchAllMonthAttendance(monthYear);
+    }
+  }, [isEmployee, monthYear, fetchAllMonthAttendance]);
+
   const setStatus = (id, status) => {
     if (!canMark) return;   // employees cannot change status
     setRecords(r => ({ ...r, [id]: status }));
@@ -119,6 +171,8 @@ const Attendance = () => {
       }));
       await markAttendance({ date, employee_type: type, records: recs });
       toast.success(`Attendance saved for ${recs.length} ${type}${recs.length !== 1 ? 's' : ''}.`);
+      // Refresh the data to show updated attendance
+      fetchEmployees();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to save attendance.');
     }
@@ -133,86 +187,133 @@ const Attendance = () => {
 
   const selectedSchool = schools.find(s => String(s.id) === String(schoolId));
 
-  // ── Employee view — single record, read-only ─────────────────────────────
+  // ── Employee view — all attendance records ─────────────────────────────
   if (isEmployee) {
-    const myRecord = employees[0];
-    const myStatus = myRecord ? (records[myRecord.id] || null) : null;
+    const [year, month] = monthYear.split('-');
+    const daysInMonth = new Date(year, parseInt(month), 0).getDate();
+    const monthName = new Date(year, parseInt(month) - 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+    // Calculate stats
+    const stats = {
+      'Present': 0,
+      'Absent': 0,
+      'Late': 0,
+      'On Leave': 0,
+      'Not Marked': 0,
+    };
+    
+    const recordsByDay = {};
+    allAttendance.forEach(rec => {
+      if (rec.date) {
+        recordsByDay[rec.date] = rec;
+        const status = rec.att_status || 'Not Marked';
+        stats[status] = (stats[status] || 0) + 1;
+      }
+    });
 
     return (
       <div className="attendance-page">
         <div className="page-header">
           <div>
             <h1 className="page-title">My Attendance</h1>
-            <p className="page-subtitle">View your attendance record</p>
+            <p className="page-subtitle">View all your attendance records</p>
           </div>
           <div className="header-actions">
             <input
-              type="date"
+              type="month"
               className="form-control"
+              value={monthYear}
+              onChange={(e) => setMonthYear(e.target.value)}
               style={{ width: 160 }}
-              value={date}
-              onChange={handleDateChange}
             />
-            <button className="btn btn-ghost btn-icon" onClick={() => fetchEmployees()} title="Refresh">
+            <button className="btn btn-ghost btn-icon" onClick={() => fetchAllMonthAttendance(monthYear)} title="Refresh">
               <MdRefresh />
             </button>
           </div>
         </div>
 
+        {/* Statistics Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-lg)' }}>
+          {Object.entries(stats).map(([status, count]) => {
+            const colorMap = {
+              'Present': '#10B981',
+              'Absent': '#EF4444',
+              'Late': '#F59E0B',
+              'On Leave': '#8B5CF6',
+              'Not Marked': '#95A3B3',
+            };
+            return (
+              <div key={status} className="stat-card" style={{ '--card-accent': `linear-gradient(135deg, ${colorMap[status]}, ${colorMap[status]}88)` }}>
+                <div className="stat-card-body">
+                  <div className="stat-card-label">{status}</div>
+                  <div className="stat-card-value">{attendanceLoading ? '—' : count}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Attendance Records Table */}
         <div className="card">
-          {loading ? (
-            <div className="att-loading">
-              <div className="att-skeleton-row">
-                <div className="skeleton" style={{ width: 52, height: 52, borderRadius: '50%' }} />
-                <div style={{ flex: 1 }}>
-                  <div className="skeleton skeleton-text" style={{ width: '40%', marginBottom: 8 }} />
-                  <div className="skeleton skeleton-text" style={{ width: '25%' }} />
-                </div>
-                <div className="skeleton" style={{ width: 120, height: 38, borderRadius: 8 }} />
-              </div>
-            </div>
-          ) : !myRecord ? (
-            <div className="empty-state" style={{ padding: '3rem' }}>
-              <div className="empty-state-icon">📋</div>
-              <p className="empty-state-title">No attendance record</p>
-              <p className="text-muted">No attendance has been recorded for this date yet.</p>
-            </div>
-          ) : (
-            <div className="att-employee-selfview">
-              {/* Date badge */}
-              <div className="att-selfview-date">
-                <MdCalendarToday />
-                {new Date(date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              </div>
+          <h3 className="card-title mb-lg">Attendance Records — {monthName}</h3>
+          <div className="table-container">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th style={{ minWidth: 100 }}>Date</th>
+                  <th style={{ minWidth: 120 }}>Day</th>
+                  <th style={{ minWidth: 100 }}>Status</th>
+                  <th style={{ minWidth: 120 }}>Check In</th>
+                  <th style={{ minWidth: 120 }}>Check Out</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendanceLoading ? (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Loading attendance data...</td>
+                  </tr>
+                ) : daysInMonth === 0 ? (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Invalid month selected</td>
+                  </tr>
+                ) : (
+                  [...Array(daysInMonth)].map((_, idx) => {
+                    const day = idx + 1;
+                    const dateStr = `${year}-${month}-${String(day).padStart(2, '0')}`;
+                    const record = recordsByDay[dateStr];
+                    const dayName = new Date(year, parseInt(month) - 1, day).toLocaleDateString('en-GB', { weekday: 'short' });
+                    const status = record?.att_status || 'Not Marked';
+                    const statusColorMap = {
+                      'Present': 'att-present',
+                      'Absent': 'att-absent',
+                      'Late': 'att-late',
+                      'On Leave': 'att-on-leave',
+                      'Not Marked': 'att-not-marked',
+                    };
 
-              {/* Employee card */}
-              <div className="att-selfview-card">
-                <div className={`att-selfview-avatar ${myStatus ? STATUS_COLORS[myStatus] : ''}`}>
-                  {myRecord.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()}
-                </div>
-                <div className="att-selfview-info">
-                  <div className="att-selfview-name">{myRecord.name}</div>
-                  <div className="text-muted text-sm">{myRecord.emp_id} &nbsp;·&nbsp; {myRecord.position || '—'}</div>
-                  <div className="text-muted text-xs" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}>
-                    <MdSchool style={{ fontSize: 13 }} /> {myRecord.school_name || '—'}
-                  </div>
-                </div>
-                <div className="att-selfview-status-wrap">
-                  {myStatus ? (
-                    <span className={`att-selfview-status-badge att-badge-${myStatus.toLowerCase().replace(' ', '-')}`}>
-                      {myStatus}
-                    </span>
-                  ) : (
-                    <span className="att-selfview-status-badge att-badge-none">Not Marked</span>
-                  )}
-                </div>
-              </div>
-
-              <p className="att-selfview-note">
-                Attendance is marked by your school's Attendance Officer or Administrator.
-              </p>
-            </div>
-          )}
+                    return (
+                      <tr key={dateStr}>
+                        <td><strong>{dateStr}</strong></td>
+                        <td>{dayName}</td>
+                        <td>
+                          <span className={`att-badge ${statusColorMap[status] || 'att-not-marked'}`}>
+                            {status}
+                          </span>
+                        </td>
+                        <td>{record?.check_in ? new Date(record.check_in).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—'}</td>
+                        <td>{record?.check_out ? new Date(record.check_out).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—'}</td>
+                        <td className="text-muted">{record?.note || '—'}</td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-muted text-sm" style={{ marginTop: 'var(--spacing-md)', textAlign: 'center' }}>
+            Attendance is marked by your school's Attendance Officer or Administrator.
+          </p>
         </div>
       </div>
     );

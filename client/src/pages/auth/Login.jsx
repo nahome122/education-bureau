@@ -44,16 +44,18 @@ const Login = () => {
 
   return (
     <div className="login-wrapper">
+      <div className="login-watermark" aria-hidden="true" />
       <div className="login-card">
         <div className="login-form-panel">
           <div className="login-form-inner">
 
             {/* Logo + title */}
             <div className="login-logo-wrap">
-              <div className="login-logo-icon">
-                <MdSchool />
-              </div>
-              <span className="login-logo-label">Education Bureau</span>
+              <img
+                src="/logo.jpg"
+                alt="Wachale Woreda Education Bureau"
+                className="login-logo-img"
+              />
             </div>
 
             <h1 className="login-title">Welcome Back</h1>

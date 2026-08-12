@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  MdSearch, MdNotifications, MdPerson, MdLogout, MdSettings,
-  MdMenu, MdKeyboardArrowDown, MdBrightness4, MdBrightness7,
-  MdLock
+  MdSearch, MdPerson, MdLogout, MdSettings,
+  MdMenu, MdKeyboardArrowDown, MdLock
 } from 'react-icons/md';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -15,18 +14,18 @@ const PAGE_TITLES = {
   '/staff':       'Staff Management',
   '/teachers':    'Teachers',
   '/attendance':  'Attendance',
+  '/teacher-performance': 'Teacher Performance',
+  '/transfer':    'Transfer',
   '/reports':     'Reports',
   '/users':       'User Management',
   '/departments': 'Departments',
-  '/positions':   'Positions',
   '/settings':    'System Settings',
   '/profile':     'My Profile',
-  '/logs':        'System Logs',
 };
 
 const Navbar = ({ onMobileMenuToggle }) => {
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { accentKey, setAccentKey } = useTheme();
   const navigate   = useNavigate();
   const location   = useLocation();
   const pageTitle  = PAGE_TITLES[location.pathname] || 'Admin Panel';
@@ -88,9 +87,15 @@ const Navbar = ({ onMobileMenuToggle }) => {
 
       {/* Right actions */}
       <div className="navbar-actions">
-        {/* Dark Mode */}
-        <button className="navbar-icon-btn" onClick={toggleTheme} data-tooltip={isDark ? 'Light Mode' : 'Dark Mode'}>
-          {isDark ? <MdBrightness7 /> : <MdBrightness4 />}
+        {/* Background mode switch */}
+        <button
+          className={`navbar-bg-switcher ${accentKey === 'amber' ? 'navbar-bg-switcher--amber' : ''}`}
+          onClick={() => setAccentKey(prev => prev === 'forest' ? 'amber' : 'forest')}
+          aria-pressed={accentKey === 'amber'}
+          title="Toggle background mode"
+        >
+          <span className="navbar-bg-switcher-track" />
+          <span className="navbar-bg-switcher-thumb" />
         </button>
 
         {/* Profile dropdown */}

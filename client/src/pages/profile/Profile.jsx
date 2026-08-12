@@ -28,7 +28,7 @@ const initials = (name = '') =>
 
 // ═════════════════════════════════════════════════════════════
 const Profile = () => {
-  const { user, changePassword, refreshUser } = useAuth();
+  const { user, changePassword, changeUsername, refreshUser } = useAuth();
   const location = useLocation();
 
   const [tab, setTab] = useState(
@@ -113,6 +113,7 @@ const Profile = () => {
       const { data } = await saveMyProfile(user, payload);
       if (!data.success) {
         toast.error(data.message || 'Failed to save profile.');
+        setSaving(false);
         return;
       }
 
@@ -125,6 +126,34 @@ const Profile = () => {
       toast.error(err.response?.data?.message || 'Failed to save profile.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // ── Change username ──────────────────────────────────────
+  const [unForm, setUnForm] = useState({ new_username: '', confirm: '' });
+  const [savingUn, setSavingUn] = useState(false);
+  const [unErrors, setUnErrors] = useState({});
+
+  const handleChangeUsername = async (e) => {
+    e.preventDefault();
+    const errs = {};
+    if (!unForm.new_username || unForm.new_username.length < 3) errs.new_username = 'Username must be at least 3 characters.';
+    if (unForm.new_username !== unForm.confirm) errs.confirm = 'Usernames do not match.';
+    if (unForm.new_username === user?.username) errs.new_username = 'New username must be different from current.';
+    if (Object.keys(errs).length) { setUnErrors(errs); return; }
+
+    setSavingUn(true);
+    setUnErrors({});
+    const result = await changeUsername(unForm.new_username);
+    setSavingUn(false);
+
+    if (result.success) {
+      toast.success('Username changed successfully.');
+      setUnForm({ new_username: '', confirm: '' });
+      setUnErrors({});
+    } else {
+      toast.error(result.message || 'Failed to change username.');
+      setUnErrors({ submit: result.message || 'Failed to change username.' });
     }
   };
 
@@ -218,6 +247,9 @@ const Profile = () => {
             <button className={`tab-btn ${tab === 'info' ? 'active' : ''}`} onClick={() => setTab('info')}>
               <MdPerson /> Account Info
             </button>
+            <button className={`tab-btn ${tab === 'username' ? 'active' : ''}`} onClick={() => setTab('username')}>
+              <MdLock /> Change Username
+            </button>
             <button className={`tab-btn ${tab === 'password' ? 'active' : ''}`} onClick={() => setTab('password')}>
               <MdLock /> Change Password
             </button>
@@ -309,7 +341,7 @@ const Profile = () => {
 
                   <div className="profile-readonly-note">
                     <MdPerson style={{ flexShrink: 0 }} />
-                    Username, role, and school can only be changed by an Administrator.
+                    To change username or password, use the dedicated tabs above. Role and school can only be changed by an Administrator.
                   </div>
 
                   <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
@@ -320,6 +352,41 @@ const Profile = () => {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ── Username tab ── */}
+          {tab === 'username' && (
+            <div className="card">
+              <h3 className="card-title mb-lg">Change Username</h3>
+              {unErrors.submit && <div style={{ color: '#dc2626', marginBottom: 16 }}>{unErrors.submit}</div>}
+              <form onSubmit={handleChangeUsername} style={{ maxWidth: 440 }}>
+                <div className="form-group mb-md">
+                  <label className="form-label required">New Username</label>
+                  <input
+                    type="text"
+                    className={`form-control ${unErrors.new_username ? 'error' : ''}`}
+                    value={unForm.new_username}
+                    onChange={e => setUnForm(p => ({ ...p, new_username: e.target.value.toLowerCase() }))}
+                    placeholder="At least 3 characters"
+                  />
+                  {unErrors.new_username && <span className="form-error">{unErrors.new_username}</span>}
+                </div>
+                <div className="form-group mb-md">
+                  <label className="form-label required">Confirm Username</label>
+                  <input
+                    type="text"
+                    className={`form-control ${unErrors.confirm ? 'error' : ''}`}
+                    value={unForm.confirm}
+                    onChange={e => setUnForm(p => ({ ...p, confirm: e.target.value.toLowerCase() }))}
+                    placeholder="Repeat new username"
+                  />
+                  {unErrors.confirm && <span className="form-error">{unErrors.confirm}</span>}
+                </div>
+                <button type="submit" className="btn btn-primary" disabled={savingUn}>
+                  {savingUn ? <span className="spinner-sm" /> : <><MdSave /> Change Username</>}
+                </button>
+              </form>
             </div>
           )}
 

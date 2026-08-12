@@ -73,8 +73,20 @@ const Staff = () => {
         school_id:     form.school_id     ? parseInt(form.school_id)     : null,
         salary:        parseFloat(form.salary) || 0,
       };
-      if (editItem) { await updateStaff(editItem.id, payload); toast.success('Staff updated.'); }
-      else          { await createStaff(payload);               toast.success('Staff member added.'); }
+      if (editItem) {
+        await updateStaff(editItem.id, payload);
+        toast.success('Staff updated.');
+      } else {
+        await createStaff(payload);
+        const nameParts = form.name.trim().toLowerCase().split(/\s+/);
+        const autoUsername = nameParts.length > 1
+          ? `${nameParts[0]}.${nameParts[nameParts.length - 1]}`
+          : nameParts[0];
+        toast.success(
+          `Staff member added.\nLogin: ${autoUsername} / Password: Employee@123`,
+          { duration: 6000 }
+        );
+      }
       setShowModal(false); fetchData();
     } catch (err) { toast.error(err.response?.data?.message || 'Failed.'); }
     setSaving(false);

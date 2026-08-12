@@ -42,8 +42,11 @@ const CardFront = ({ emp, photo, onPhotoUpload, canUpload }) => (
   <div className="id-card-front">
     <div className="id-card-side-strip" />
     <div className="id-card-header">
-      <span className="id-card-bureau">WACHALE WOREDA</span>
-      <span className="id-card-bureau-sub">Education Bureau</span>
+      <img src="/logo.jpg" alt="Bureau Logo" className="id-card-logo" />
+      <div className="id-card-header-text">
+        <span className="id-card-bureau">WACHALE WOREDA</span>
+        <span className="id-card-bureau-sub">Education Bureau</span>
+      </div>
     </div>
     <div className="id-card-body">
       <div className="id-card-photo-wrap">
@@ -97,9 +100,12 @@ const CardBack = ({ emp }) => {
     <div className="id-card-back">
       <div className="id-card-side-strip" />
       <div className="id-card-back-header">
-        <div>
-          <div className="id-card-back-logo-text">Wachale Woreda</div>
-          <div className="id-card-back-subtitle">Education Bureau — Staff ID</div>
+        <div className="id-card-back-header-left">
+          <img src="/logo.jpg" alt="Bureau Logo" className="id-card-back-logo-img" />
+          <div>
+            <div className="id-card-back-logo-text">Wachale Woreda</div>
+            <div className="id-card-back-subtitle">Education Bureau — Staff ID</div>
+          </div>
         </div>
         <div className="id-card-back-logo-text" style={{ fontSize: 10 }}>{empId}</div>
       </div>
@@ -128,6 +134,171 @@ const CardBack = ({ emp }) => {
       </div>
     </div>
   );
+};
+
+// ══════════════════════════════════════════════════════════════
+// PRINT HELPER — opens a dedicated window so #root hiding doesn't
+// block the printable card
+// ══════════════════════════════════════════════════════════════
+const handlePrint = (emp, photo) => {
+  const empId       = emp.tid || emp.sid || '—';
+  const isTeacher   = emp.emp_type === 'teacher';
+  const typeLabel   = isTeacher ? 'Teacher' : 'Staff';
+  const joiningDate = emp.joining
+    ? new Date(emp.joining).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' })
+    : '—';
+
+  const photoHtml = photo
+    ? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
+    : `<span style="font-size:20px;font-weight:800;color:#1A56DB;">${initials(emp.name)}</span>`;
+
+  const QR_HTML = QR_PATTERN.map((cell, i) =>
+    `<div style="width:5px;height:5px;background:${cell === 1 ? '#0B1F4B' : '#e2e8f0'};"></div>`
+  ).join('');
+
+  const win = window.open('', '_blank', 'width=900,height=620');
+  if (!win) { alert('Please allow popups to print the ID card.'); return; }
+
+  win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ID Card — ${emp.name}</title>
+  <style>
+    @page { size: 210mm 80mm landscape; margin: 8mm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #fff; font-family: 'Inter', Arial, sans-serif;
+           display: flex; justify-content: center; align-items: center;
+           min-height: 100vh; gap: 12mm; }
+    .card { width: 85.6mm; height: 54mm; border-radius: 10px; overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.18); position: relative;
+            display: flex; flex-direction: column; }
+    /* FRONT */
+    .front-header { background: linear-gradient(135deg,#0B1F4B 0%,#1239A5 60%,#1A56DB 100%);
+                    padding: 5px 10px 4px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .front-logo   { width: 28px; height: 28px; border-radius: 50%; object-fit: contain; background:#fff; }
+    .bureau       { color:#fff; font-size:8.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+    .bureau-sub   { color:rgba(255,255,255,0.78); font-size:6.5px; letter-spacing:0.7px; text-transform:uppercase; }
+    .side-strip   { position:absolute; left:0; top:0; bottom:0; width:4px;
+                    background:linear-gradient(180deg,#1A56DB 0%,#0B1F4B 100%); border-radius:10px 0 0 10px; }
+    .body         { display:flex; flex:1; padding:6px 10px 5px; gap:8px; align-items:flex-start; min-height:0; }
+    .photo-wrap   { display:flex; flex-direction:column; align-items:center; gap:3px; flex-shrink:0; }
+    .photo        { width:58px; height:58px; border-radius:50%; border:2px solid #1A56DB;
+                    background:linear-gradient(135deg,#EEF2F7,#CBD5E1);
+                    display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .info         { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; overflow:hidden; }
+    .emp-name     { font-size:10px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .emp-id       { font-size:8px; font-weight:700; color:#1A56DB; letter-spacing:0.6px; text-transform:uppercase; }
+    .info-row     { display:flex; gap:3px; font-size:7.5px; line-height:1.4; }
+    .info-row span:first-child { color:#94A3B8; font-weight:600; white-space:nowrap; }
+    .info-row span:last-child  { color:#334155; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .status       { display:inline-flex; align-items:center; padding:1px 6px; border-radius:9999px;
+                    font-size:7px; font-weight:700; margin-top:2px; align-self:flex-start; }
+    .active   { background:rgba(5,122,85,0.12);  color:#057A55; }
+    .inactive { background:rgba(200,30,30,0.10); color:#C81E1E; }
+    .onleave  { background:rgba(194,120,3,0.12); color:#C27803; }
+    .footer   { background:linear-gradient(135deg,#0B1F4B,#1239A5); padding:4px 10px;
+                display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+    .footer span { color:rgba(255,255,255,0.75); font-size:7px; font-weight:500; letter-spacing:0.4px; }
+    /* BACK */
+    .back         { background:#f8fafc; }
+    .back-header  { background:linear-gradient(135deg,#0B1F4B 0%,#1239A5 60%,#1A56DB 100%);
+                    padding:5px 10px 4px; display:flex; align-items:center;
+                    justify-content:space-between; flex-shrink:0; }
+    .back-header-left { display:flex; align-items:center; gap:5px; }
+    .back-logo    { width:22px; height:22px; border-radius:50%; object-fit:contain; background:#fff; }
+    .back-title   { color:#fff; font-size:8px; font-weight:800; }
+    .back-sub     { color:rgba(255,255,255,0.7); font-size:6.5px; }
+    .back-id      { color:#fff; font-size:9px; font-weight:700; }
+    .back-body    { display:flex; flex:1; padding:6px 10px; gap:8px; align-items:center; }
+    .qr-grid      { display:grid; grid-template-columns:repeat(7,5px); gap:1px; padding:4px;
+                    background:#fff; border-radius:4px; border:1px solid #e2e8f0; }
+    .back-info    { flex:1; display:flex; flex-direction:column; gap:2px; }
+    .back-section { font-size:7px; font-weight:700; color:#1A56DB; text-transform:uppercase;
+                    letter-spacing:0.5px; margin-bottom:2px; }
+    .back-row     { display:flex; gap:3px; font-size:7px; line-height:1.4; }
+    .back-row span:first-child { color:#94A3B8; font-weight:600; white-space:nowrap; }
+    .back-row span:last-child  { color:#334155; }
+    .type-badge   { display:inline-flex; align-items:center; padding:1px 7px; border-radius:9999px;
+                    font-size:7px; font-weight:700; margin-top:3px; align-self:flex-start; }
+    .type-teacher { background:rgba(26,86,219,0.12); color:#1A56DB; }
+    .type-staff   { background:rgba(109,40,217,0.12); color:#6D28D9; }
+    .back-footer  { background:#0B1F4B; padding:4px 10px; display:flex;
+                    justify-content:space-between; align-items:center; flex-shrink:0; }
+    .back-footer span { color:rgba(255,255,255,0.65); font-size:6.5px; }
+    @media print { body { gap: 12mm; } }
+  </style>
+</head>
+<body>
+  <!-- FRONT -->
+  <div class="card">
+    <div class="side-strip"></div>
+    <div class="front-header">
+      <img src="/logo.jpg" class="front-logo" alt="logo" />
+      <div>
+        <div class="bureau">WACHALE WOREDA</div>
+        <div class="bureau-sub">Education Bureau</div>
+      </div>
+    </div>
+    <div class="body">
+      <div class="photo-wrap">
+        <div class="photo">${photoHtml}</div>
+      </div>
+      <div class="info">
+        <div class="emp-name">${emp.name || '—'}</div>
+        <div class="emp-id">${empId}</div>
+        ${emp.position        ? `<div class="info-row"><span>Position:</span><span>${emp.position}</span></div>` : ''}
+        ${emp.school_name     ? `<div class="info-row"><span>School:</span><span>${emp.school_name}</span></div>` : ''}
+        ${emp.department_name ? `<div class="info-row"><span>Dept:</span><span>${emp.department_name}</span></div>` : ''}
+        ${emp.phone           ? `<div class="info-row"><span>Phone:</span><span>${emp.phone}</span></div>` : ''}
+        <span class="status ${(emp.status||'').toLowerCase().replace(' ','')==='active'?'active':(emp.status||'').toLowerCase().includes('leave')?'onleave':'inactive'}">${emp.status || 'Unknown'}</span>
+      </div>
+    </div>
+    <div class="footer">
+      <span>Valid Employee ID Card</span>
+      <span>${new Date().getFullYear()}</span>
+    </div>
+  </div>
+
+  <!-- BACK -->
+  <div class="card back">
+    <div class="side-strip"></div>
+    <div class="back-header">
+      <div class="back-header-left">
+        <img src="/logo.jpg" class="back-logo" alt="logo" />
+        <div>
+          <div class="back-title">Wachale Woreda</div>
+          <div class="back-sub">Education Bureau — Staff ID</div>
+        </div>
+      </div>
+      <div class="back-id">${empId}</div>
+    </div>
+    <div class="back-body">
+      <div class="qr-grid">${QR_HTML}</div>
+      <div class="back-info">
+        <div class="back-section">Employee Details</div>
+        <div class="back-row"><span>Name:</span><span>${emp.name || '—'}</span></div>
+        <div class="back-row"><span>ID:</span><span>${empId}</span></div>
+        ${emp.school_name ? `<div class="back-row"><span>School:</span><span>${emp.school_name}</span></div>` : ''}
+        <div class="back-row"><span>Joined:</span><span>${joiningDate}</span></div>
+        <span class="type-badge ${isTeacher ? 'type-teacher' : 'type-staff'}">${typeLabel}</span>
+      </div>
+    </div>
+    <div class="back-footer">
+      <span>If found, return to nearest school office</span>
+      <span>Hotline: +251-XXX-XXXX</span>
+    </div>
+  </div>
+
+  <script>
+    // Wait for images to load then print
+    window.onload = function() {
+      setTimeout(function() { window.print(); window.close(); }, 600);
+    };
+  </script>
+</body>
+</html>`);
+  win.document.close();
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -161,7 +332,7 @@ const InlineCardDisplay = ({ emp, photo, onPhotoUpload, canUpload, onClose, show
       </div>
     </div>
     <div className="inline-card-actions">
-      <button className="btn-print" onClick={() => window.print()}>
+      <button className="btn-print" onClick={() => handlePrint(emp, photo)}>
         <MdPrint /> Print ID Card
       </button>
     </div>

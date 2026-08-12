@@ -11,22 +11,28 @@
 import api from './api';
 import * as mock from './mockApi';
 
-// Start as false — use mock immediately.
-// If backend is actually running, it will be detected on first real call.
-let _backendUp = false;
+// null  = not yet checked (health-check will run on first call)
+// true  = backend confirmed up
+// false = backend confirmed down → use mock
+let _backendUp = null;
+
+// Single in-flight promise so parallel first calls don't each fire a health-check
+let _healthCheckPromise = null;
 
 const isBackendUp = async () => {
-  // Always mock when already confirmed down
-  if (_backendUp === false) return false;
   if (_backendUp === true)  return true;
-  // null = first check
-  try {
-    await api.get('/health', { timeout: 1500 });
-    _backendUp = true;
-  } catch {
-    _backendUp = false;
+  if (_backendUp === false) return false;
+
+  // Only one health-check at a time
+  if (!_healthCheckPromise) {
+    _healthCheckPromise = api.get('/health', { timeout: 1500 })
+      .then(() => { _backendUp = true;  })
+      .catch(() => { _backendUp = false; })
+      .finally(() => { _healthCheckPromise = null; });
   }
-  return _backendUp;
+
+  await _healthCheckPromise;
+  return _backendUp === true;
 };
 
 /**
@@ -81,6 +87,11 @@ export const createPosition  = (body)  => call(() => api.post('/positions', body
 export const updatePosition  = (id, b) => call(() => api.put(`/positions/${id}`, b),    () => mock.mockUpdatePosition(id, b));
 export const deletePosition  = (id)    => call(() => api.delete(`/positions/${id}`),    () => mock.mockDeletePosition(id));
 
+// ─── TRANSFERS ───────────────────────────────────────────────────────────────
+export const getTransfers   = (p = {}) => call(() => api.get(`/transfers?${qs(p)}`),  () => mock.mockGetTransfers(p));
+export const createTransfer = (body)  => call(() => api.post('/transfers', body),      () => mock.mockCreateTransfer(body));
+export const updateTransferStatus = (id, body) => call(() => api.patch(`/transfers/${id}/status`, body), () => mock.mockUpdateTransferStatus(id, body));
+
 // ─── TEACHERS ────────────────────────────────────────────────────────────────
 // _emp_code is a mock-only param — strip it before sending to real backend
 export const getTeachers    = (p = {}) => {
@@ -127,6 +138,11 @@ export const saveMyProfile = (user, body) => {
 export const changeEmployeePw   = (username, cur, nw) => call(
   () => api.post('/auth/change-password', { current_password: cur, new_password: nw }),
   () => mock.mockChangeEmployeePassword(username, cur, nw)
+);
+
+export const changeUsernameApi  = (currentUser, newUsername) => call(
+  () => api.put('/auth/username', { new_username: newUsername }),
+  () => mock.mockChangeUsername(currentUser, newUsername)
 );
 
 // ─── ATTENDANCE ──────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
 {
-  "start": "npm start",
-  "build": "npm install && npm run build --prefix client || true"
+  "build": "npm run build",
+  "start": "NODE_ENV=production npm start"
 }

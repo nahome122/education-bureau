@@ -125,12 +125,30 @@
 /* Header stripe */
 .id-card-header {
   background: linear-gradient(135deg, #0B1F4B 0%, #1239A5 60%, #1A56DB 100%);
-  padding: 8px 12px 6px;
+  padding: 6px 10px 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+/* Bureau logo in card header */
+.id-card-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: contain;
+  background: #fff;
+  flex-shrink: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.id-card-header-text {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 1px;
-  flex-shrink: 0;
 }
 
 .id-card-bureau {
@@ -469,8 +487,26 @@
   box-shadow: 0 5px 16px rgba(18,57,165,0.38);
 }
 
+/* Back header left (logo + text) */
+.id-card-back-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.id-card-back-logo-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: contain;
+  background: #fff;
+  flex-shrink: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
 /* ══════════════════════════════════════════════════════════
-   PRINTABLE WRAPPER (hidden on screen)
+   PRINTABLE WRAPPER (hidden on screen — kept for fallback)
 ══════════════════════════════════════════════════════════ */
 .id-card-printable {
   display: none;
@@ -479,48 +515,9 @@
 /* ══════════════════════════════════════════════════════════
    PRINT MEDIA QUERY
 ══════════════════════════════════════════════════════════ */
-@media print {
-  /* Hide the entire app */
-  body > * { display: none !important; }
-  #root    { display: none !important; }
-
-  /* Show only the printable card */
-  .id-card-printable {
-    display: flex !important;
-    position: fixed;
-    inset: 0;
-    background: #ffffff;
-    justify-content: center;
-    align-items: center;
-    z-index: 99999;
-  }
-
-  /* Credit-card dimensions */
-  .id-card-print-card {
-    width: 85.6mm;
-    height: 54mm;
-    box-shadow: none !important;
-    border-radius: 10px;
-    overflow: hidden;
-    page-break-inside: avoid;
-  }
-
-  /* Force color printing */
-  .id-card-header,
-  .id-card-footer,
-  .id-card-back-header,
-  .id-card-back-footer,
-  .id-card-side-strip {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    color-adjust: exact;
-  }
-
-  @page {
-    size: 85.6mm 54mm landscape;
-    margin: 0;
-  }
-}
+/* Print is handled via popup window (handlePrint function).
+   The old @media print that hid #root is removed since it
+   prevented the printable div from showing. */
 
 /* ── Locked upload (not own record) ─────────────────────── */
 .id-card-upload-locked {

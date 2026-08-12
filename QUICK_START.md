@@ -2,15 +2,31 @@
 
 ## ✅ Option 1: Use Mock Mode NOW (No Database Setup Required)
 
-The app works in **offline mock mode** with full functionality. Just run:
+The app works in **offline mock mode** with full functionality. Just run the commands below in two separate terminals.
 
-```bash
+```powershell
 # Terminal 1 - Start Server
-cd server
+cd "C:\Users\Nafel\OneDrive\Desktop\woreda education\server"
 npm install
 npm run dev
 
-# Terminal 2 - Start Client  
+# Terminal 2 - Start Client
+cd "C:\Users\Nafel\OneDrive\Desktop\woreda education\client"
+npm install
+npm run dev
+```
+
+If you are already in the workspace root, you can instead use:
+
+```powershell
+cd server
+npm install
+npm run dev
+```
+
+and in the other terminal:
+
+```powershell
 cd client
 npm install
 npm run dev

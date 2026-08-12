@@ -1,36 +1,84 @@
 import React, { useEffect, useState } from 'react';
 import {
   MdSchool, MdPeople, MdGroups, MdEventAvailable,
-  MdPersonAdd, MdArrowForward, MdCheckCircle, MdCancel,
-  MdSupervisorAccount, MdVerifiedUser, MdPersonOff, MdChildCare
+  MdArrowForward, MdCheckCircle, MdCancel,
+  MdSupervisorAccount, MdVerifiedUser, MdPersonOff,
+  MdChildCare, MdPersonAdd, MdTrendingUp, MdTrendingDown,
+  MdAccessTime, MdBarChart, MdStar,
 } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import {
   Chart as ChartJS, CategoryScale, LinearScale,
-  BarElement, Tooltip, Legend
+  BarElement, LineElement, PointElement,
+  Tooltip, Legend, Filler,
 } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Line } from 'react-chartjs-2';
 import { getDashboard } from '../../utils/apiCall';
 import { useAuth } from '../../context/AuthContext';
 import './Dashboard.css';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale, LinearScale,
+  BarElement, LineElement, PointElement,
+  Tooltip, Legend, Filler,
+);
 
-const StatCard = ({ icon, label, value, color, link, accent }) => (
-  <div className="stat-box animate-slide-up" style={{ '--card-accent': accent }}>
-    <div className="stat-box-content">
-      <div className={`stat-box-icon ${color}`}>{icon}</div>
-      <div className="stat-box-info">
-        <h3>{value ?? '—'}</h3>
-        <p>{label}</p>
-      </div>
+/* ── KPI card ────────────────────────────────────────────── */
+const KpiCard = ({ icon, label, value, trend, trendLabel, gradient, iconBg, link }) => (
+  <div className="kpi-card animate-slide-up">
+    <div className="kpi-top">
+      <div className="kpi-icon" style={{ background: iconBg }}>{icon}</div>
+      {trend !== undefined && (
+        <span className={`kpi-trend ${trend >= 0 ? 'kpi-trend--up' : 'kpi-trend--down'}`}>
+          {trend >= 0 ? <MdTrendingUp /> : <MdTrendingDown />}
+          {Math.abs(trend)}%
+        </span>
+      )}
     </div>
+    <div className="kpi-value">{value ?? '—'}</div>
+    <div className="kpi-label">{label}</div>
+    {trendLabel && <div className="kpi-trend-label">{trendLabel}</div>}
+    <div className="kpi-bar" style={{ background: gradient }} />
     {link && (
-      <Link to={link} className="stat-box-link">View all <MdArrowForward /></Link>
+      <Link to={link} className="kpi-link">
+        View details <MdArrowForward />
+      </Link>
     )}
   </div>
 );
 
+/* ── Activity item ───────────────────────────────────────── */
+const ActivityItem = ({ name, role, status, time }) => (
+  <div className="activity-item">
+    <div className={`activity-avatar ${status === 'success' ? 'activity-avatar--success' : 'activity-avatar--fail'}`}>
+      {(name || '?')[0].toUpperCase()}
+    </div>
+    <div className="activity-info">
+      <span className="activity-name">{name}</span>
+      <span className="activity-role">{role || '—'}</span>
+    </div>
+    <div className="activity-right">
+      <span className={`badge ${status === 'success' ? 'badge-success' : 'badge-danger'}`}>
+        {status}
+      </span>
+      <span className="activity-time">
+        <MdAccessTime /> {time}
+      </span>
+    </div>
+  </div>
+);
+
+/* ── Quick action button ─────────────────────────────────── */
+const QuickAction = ({ to, icon, label, gradient }) => (
+  <Link to={to} className="quick-action" style={{ '--qa-gradient': gradient }}>
+    <div className="quick-action-icon">{icon}</div>
+    <span>{label}</span>
+  </Link>
+);
+
+/* ════════════════════════════════════════════════════════════
+   DASHBOARD
+   ════════════════════════════════════════════════════════════ */
 const Dashboard = () => {
   const { user, isAdmin, isEmployee } = useAuth();
   const [stats,   setStats]   = useState(null);
@@ -43,114 +91,261 @@ const Dashboard = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const chartData = {
-    labels: stats?.monthly?.map(m => m.month) || [],
+  /* ── Chart configs ─────────────────────────────────────── */
+  const months = stats?.monthly?.map(m => m.month) || [];
+
+  const barData = {
+    labels: months,
     datasets: [
-      { label: 'Present',        data: stats?.monthly?.map(m => m.present) || [], backgroundColor: 'rgba(37,99,235,0.75)', borderRadius: 6 },
-      { label: 'Total Recorded', data: stats?.monthly?.map(m => m.total)   || [], backgroundColor: 'rgba(16,185,129,0.45)', borderRadius: 6 },
+      {
+        label: 'Present',
+        data: stats?.monthly?.map(m => m.present) || [],
+        backgroundColor: 'rgba(99,102,241,0.80)',
+        borderRadius: 6,
+        borderSkipped: false,
+      },
+      {
+        label: 'Total',
+        data: stats?.monthly?.map(m => m.total) || [],
+        backgroundColor: 'rgba(16,185,129,0.40)',
+        borderRadius: 6,
+        borderSkipped: false,
+      },
     ],
   };
 
-  const chartOptions = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 6, font: { family: 'Poppins', size: 12 } } },
-      tooltip: { backgroundColor: 'rgba(15,23,42,0.9)', titleColor: '#fff', bodyColor: '#94A3B8', padding: 12, cornerRadius: 8 },
-    },
-    scales: {
-      x: { grid: { display: false }, ticks: { font: { family: 'Poppins', size: 11 }, color: '#94A3B8' } },
-      y: { grid: { color: 'rgba(226,232,240,0.5)' }, ticks: { font: { family: 'Poppins', size: 11 }, color: '#94A3B8' } },
-    },
+  const lineData = {
+    labels: months.length ? months : ['Jan','Feb','Mar','Apr','May','Jun'],
+    datasets: [
+      {
+        label: 'Attendance Rate %',
+        data: stats?.monthly?.map(m =>
+          m.total ? Math.round((m.present / m.total) * 100) : 0
+        ) || [72, 85, 78, 90, 88, 94],
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99,102,241,0.10)',
+        pointBackgroundColor: '#6366f1',
+        pointRadius: 4,
+        tension: 0.4,
+        fill: true,
+      },
+    ],
   };
 
-  if (loading) {
-    return (
-      <div className="dashboard-container">
-        <div className="main-stats-grid">
-          {[...Array(8)].map((_, i) => <div key={i} className="stat-box"><div className="skeleton skeleton-card" /></div>)}
-        </div>
+  const chartOpts = (yLabel) => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { usePointStyle: true, boxWidth: 7, font: { size: 11 }, color: 'var(--text-secondary)' },
+      },
+      tooltip: {
+        backgroundColor: '#0f172a',
+        titleColor: '#f1f5f9',
+        bodyColor: '#94a3b8',
+        padding: 12,
+        cornerRadius: 10,
+      },
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 }, color: 'var(--text-muted)' } },
+      y: {
+        grid: { color: 'rgba(226,232,240,0.45)' },
+        ticks: { font: { size: 11 }, color: 'var(--text-muted)' },
+        title: yLabel ? { display: true, text: yLabel, color: 'var(--text-muted)', font: { size: 10 } } : undefined,
+      },
+    },
+  });
+
+  if (loading) return (
+    <div className="dashboard">
+      <div className="kpi-grid">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="kpi-card"><div className="skeleton skeleton-card" style={{ height: 140 }} /></div>
+        ))}
       </div>
-    );
-  }
+    </div>
+  );
+
+  const firstName = user?.full_name?.split(' ')[0] || 'there';
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const hour  = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   return (
-    <div className="dashboard-container">
-      {/* Greeting */}
-      <div className="dashboard-greeting mb-lg">
-        <h1 className="page-title">
-          Welcome back, <span className="text-primary">{user?.full_name?.split(' ')[0]}</span>
-        </h1>
-        <p className="page-subtitle">
-          {user?.role_label} — {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
+    <div className="dashboard">
+
+      {/* ── Hero banner ── */}
+      <div className="dash-hero animate-slide-up">
+        <div className="dash-hero-text">
+          <h1>{greeting}, <span>{firstName}</span> 👋</h1>
+          <p>{user?.role_label} &nbsp;·&nbsp; {today}</p>
+        </div>
+        <div className="dash-hero-badges">
+          <div className="hero-badge hero-badge--green">
+            <MdCheckCircle /> {stats?.presentToday ?? 0} Present Today
+          </div>
+          <div className="hero-badge hero-badge--red">
+            <MdCancel /> {stats?.absentToday ?? 0} Absent Today
+          </div>
+        </div>
       </div>
 
-      {/* Stat cards */}
-      <div className="main-stats-grid">
-        <StatCard icon={<MdSchool size={32}/>}           label="Total Schools"   value={stats?.totalSchools}   color="text-blue"   link={isAdmin ? '/schools' : null}   accent="var(--gradient-primary)" />
-        <StatCard icon={<MdPeople size={32}/>}            label="Total Teachers"  value={stats?.totalTeachers}  color="text-cyan"   link="/teachers"                     accent="var(--gradient-secondary)" />
-        <StatCard icon={<MdGroups size={32}/>}            label="Total Staff"     value={stats?.totalStaff}     color="text-orange" link="/staff"                        accent="var(--gradient-warning)" />
-        <StatCard icon={<MdChildCare size={32}/>}         label="Total Students"  value={stats?.totalStudents}  color="text-teal"   link={isAdmin ? '/schools' : null}   accent="linear-gradient(135deg,#0891B2,#06B6D4)" />
-        <StatCard icon={<MdSupervisorAccount size={32}/>} label="Total Users"     value={stats?.totalUsers}     color="text-purple" link={isAdmin ? '/users' : null}     accent="var(--gradient-purple)" />
-        <StatCard icon={<MdEventAvailable size={32}/>}    label="Present Today"   value={stats?.presentToday}   color="text-green"  link="/attendance"                   accent="linear-gradient(135deg,#22C55E,#10B981)" />
-        <StatCard icon={<MdCancel size={32}/>}            label="Absent Today"    value={stats?.absentToday}    color="text-red"    link="/attendance"                   accent="var(--gradient-danger)" />
+      {/* ── KPI cards ── */}
+      <div className="kpi-grid">
+        <KpiCard
+          icon={<MdSchool />}          label="Total Schools"
+          value={stats?.totalSchools}  trend={5}  trendLabel="vs last month"
+          gradient="linear-gradient(90deg,#6366f1,#818cf8)"
+          iconBg="rgba(99,102,241,0.12)"
+          link={isAdmin ? '/schools' : null}
+        />
+        <KpiCard
+          icon={<MdPeople />}          label="Total Teachers"
+          value={stats?.totalTeachers} trend={3}  trendLabel="new this month"
+          gradient="linear-gradient(90deg,#10b981,#34d399)"
+          iconBg="rgba(16,185,129,0.12)"
+          link="/teachers"
+        />
+        <KpiCard
+          icon={<MdGroups />}          label="Total Staff"
+          value={stats?.totalStaff}    trend={1}  trendLabel="new this month"
+          gradient="linear-gradient(90deg,#f59e0b,#fbbf24)"
+          iconBg="rgba(245,158,11,0.12)"
+          link="/staff"
+        />
+        <KpiCard
+          icon={<MdChildCare />}       label="Total Students"
+          value={stats?.totalStudents} trend={8}  trendLabel="enrolled"
+          gradient="linear-gradient(90deg,#06b6d4,#22d3ee)"
+          iconBg="rgba(6,182,212,0.12)"
+          link={isAdmin ? '/schools' : null}
+        />
+        <KpiCard
+          icon={<MdEventAvailable />}  label="Present Today"
+          value={stats?.presentToday}
+          gradient="linear-gradient(90deg,#22c55e,#4ade80)"
+          iconBg="rgba(34,197,94,0.12)"
+          link="/attendance"
+        />
+        <KpiCard
+          icon={<MdCancel />}          label="Absent Today"
+          value={stats?.absentToday}   trend={-2} trendLabel="vs yesterday"
+          gradient="linear-gradient(90deg,#ef4444,#f87171)"
+          iconBg="rgba(239,68,68,0.12)"
+          link="/attendance"
+        />
         {isAdmin && <>
-          <StatCard icon={<MdVerifiedUser size={32}/>}    label="Active Users"    value={stats?.activeUsers}    color="text-green"  link="/users"                        accent="linear-gradient(135deg,#22C55E,#10B981)" />
-          <StatCard icon={<MdPersonOff size={32}/>}       label="Inactive Users"  value={stats?.inactiveUsers}  color="text-gray"   link="/users"                        accent="linear-gradient(135deg,#64748B,#94A3B8)" />
+          <KpiCard
+            icon={<MdVerifiedUser />}  label="Active Users"
+            value={stats?.activeUsers}
+            gradient="linear-gradient(90deg,#8b5cf6,#a78bfa)"
+            iconBg="rgba(139,92,246,0.12)"
+            link="/users"
+          />
+          <KpiCard
+            icon={<MdPersonOff />}     label="Inactive Users"
+            value={stats?.inactiveUsers}
+            gradient="linear-gradient(90deg,#64748b,#94a3b8)"
+            iconBg="rgba(100,116,139,0.12)"
+            link="/users"
+          />
         </>}
       </div>
 
-      {/* Chart + recent logins */}
-      <div className="dashboard-middle-row mt-lg">
-        <div className={`card dashboard-chart-card animate-slide-up${isEmployee ? ' dashboard-chart-full' : ''}`}>
-          <h3 className="card-title mb-lg">Monthly Attendance Overview</h3>
-          <div style={{ height: '300px' }}>
+      {/* ── Charts row ── */}
+      <div className={`dash-charts-row ${isEmployee ? 'dash-charts-single' : ''}`}>
+        {/* Bar chart */}
+        <div className="card dash-chart-card animate-slide-up">
+          <div className="card-header">
+            <div>
+              <h3 className="card-title">Monthly Attendance</h3>
+              <p className="card-subtitle">Present vs total recorded</p>
+            </div>
+            <div className="chart-badge"><MdBarChart /> Bar</div>
+          </div>
+          <div className="chart-wrap">
             {stats?.monthly?.length > 0
-              ? <Bar data={chartData} options={chartOptions} />
-              : <div className="empty-state"><div className="empty-state-icon">📊</div><p className="text-muted">No attendance data yet</p></div>
+              ? <Bar data={barData} options={chartOpts('Employees')} />
+              : <div className="empty-state"><div className="empty-state-icon">📊</div><p className="text-muted">No data yet</p></div>
             }
           </div>
         </div>
 
+        {/* Line chart */}
+        <div className="card dash-chart-card animate-slide-up">
+          <div className="card-header">
+            <div>
+              <h3 className="card-title">Attendance Rate</h3>
+              <p className="card-subtitle">Monthly trend (%)</p>
+            </div>
+            <div className="chart-badge chart-badge--purple"><MdTrendingUp /> Trend</div>
+          </div>
+          <div className="chart-wrap">
+            <Line data={lineData} options={chartOpts('%')} />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Bottom row: activity + quick actions ── */}
+      <div className={`dash-bottom-row ${isEmployee ? 'dash-bottom-single' : ''}`}>
+
+        {/* Recent activity */}
         {!isEmployee && (
-          <div className="card dashboard-list-card animate-slide-up">
-            <h3 className="card-title mb-lg">Recent Login Activity</h3>
-            <div className="recent-logins-list">
-              {stats?.recentLogins?.length > 0 ? stats.recentLogins.map((log, i) => (
-                <div key={i} className="recent-login-item">
-                  <div className={`login-status-dot ${log.status === 'success' ? 'success' : 'failed'}`} />
-                  <div className="login-info">
-                    <span className="login-name">{log.full_name || log.username}</span>
-                    <span className="login-role text-muted">{log.role || '—'}</span>
-                  </div>
-                  <div className="login-meta">
-                    <span className={`badge ${log.status === 'success' ? 'badge-success' : 'badge-danger'}`}>{log.status}</span>
-                    <span className="login-time text-muted">
-                      {new Date(log.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                </div>
-              )) : (
-                <div className="empty-state" style={{ padding: '2rem' }}><p className="text-muted">No recent logins</p></div>
+          <div className="card dash-activity-card animate-slide-up">
+            <div className="card-header">
+              <div>
+                <h3 className="card-title">Recent Activity</h3>
+                <p className="card-subtitle">Latest login sessions</p>
+              </div>
+              <span className="activity-live"><span className="live-dot" /> Live</span>
+            </div>
+            <div className="activity-list">
+              {stats?.recentLogins?.length > 0
+                ? stats.recentLogins.map((log, i) => (
+                    <ActivityItem
+                      key={i}
+                      name={log.full_name || log.username}
+                      role={log.role}
+                      status={log.status}
+                      time={new Date(log.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                    />
+                  ))
+                : <div className="empty-state" style={{ padding: '2rem' }}><p className="text-muted">No recent activity</p></div>
+              }
+            </div>
+          </div>
+        )}
+
+        {/* Quick actions */}
+        {!isEmployee && (
+          <div className="card dash-actions-card animate-slide-up">
+            <div className="card-header">
+              <div>
+                <h3 className="card-title">Quick Actions</h3>
+                <p className="card-subtitle">Jump to key tasks</p>
+              </div>
+              <MdStar className="text-warning" style={{ fontSize: 20 }} />
+            </div>
+            <div className="quick-actions-grid">
+              {isAdmin && (
+                <QuickAction to="/users"      icon={<MdPersonAdd />}      label="Add User"         gradient="linear-gradient(135deg,#6366f1,#818cf8)" />
+              )}
+              {isAdmin && (
+                <QuickAction to="/schools"    icon={<MdSchool />}         label="Add School"       gradient="linear-gradient(135deg,#10b981,#34d399)" />
+              )}
+              <QuickAction   to="/teachers"   icon={<MdPeople />}         label="Teachers"         gradient="linear-gradient(135deg,#06b6d4,#22d3ee)" />
+              <QuickAction   to="/attendance" icon={<MdEventAvailable />} label="Attendance"       gradient="linear-gradient(135deg,#8b5cf6,#a78bfa)" />
+              <QuickAction   to="/reports"    icon={<MdCheckCircle />}    label="Reports"          gradient="linear-gradient(135deg,#f59e0b,#fbbf24)" />
+              {isAdmin && (
+                <QuickAction to="/users"      icon={<MdSupervisorAccount />} label="Users"         gradient="linear-gradient(135deg,#ef4444,#f87171)" />
               )}
             </div>
           </div>
         )}
       </div>
 
-      {/* Quick actions — hidden for employees (Teacher/Staff) */}
-      {!isEmployee && (
-        <div className="card quick-actions-container animate-slide-up mt-lg">
-          <h3 className="card-title mb-lg">Quick Actions</h3>
-          <div className="quick-actions-grid">
-            {isAdmin && <Link to="/users"      className="action-btn action-blue">   <MdPersonAdd size={22} /> Add User</Link>}
-            {isAdmin && <Link to="/schools"    className="action-btn action-green">  <MdSchool size={22} /> Add School</Link>}
-            <Link to="/teachers"               className="action-btn action-cyan">   <MdPeople size={22} /> Manage Teachers</Link>
-            <Link to="/attendance"             className="action-btn action-purple"> <MdEventAvailable size={22} /> Mark Attendance</Link>
-            <Link to="/reports"                className="action-btn action-orange"> <MdCheckCircle size={22} /> View Reports</Link>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

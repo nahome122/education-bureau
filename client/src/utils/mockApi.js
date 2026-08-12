@@ -5,7 +5,7 @@
  */
 import {
   mockSchools, mockTeachers, mockStaff, mockDepartments,
-  mockPositions, mockUsers, mockDashboardStats,
+  mockPositions, mockUsers, mockDashboardStats, mockTransfers,
 } from './mockData';
 
 // ─── LocalStorage persistence helpers ───────────────────────────────────────
@@ -15,6 +15,7 @@ const KEYS = {
   staff:       'tsms_staff',
   departments: 'tsms_departments',
   positions:   'tsms_positions',
+  transfers:   'tsms_transfers',
   users:       'tsms_users',
   passwords:   'tsms_passwords',
   attendance:  'tsms_attendance',
@@ -48,6 +49,7 @@ let teachers    = load(KEYS.teachers,    mockTeachers);
 let staff       = load(KEYS.staff,       mockStaff);
 let departments = load(KEYS.departments, mockDepartments);
 let positions   = load(KEYS.positions,   mockPositions);
+let transfers   = load(KEYS.transfers,   mockTransfers);
 let users       = load(KEYS.users,       mockUsers);
 let passwords   = load(KEYS.passwords,   DEFAULT_PASSWORDS);
 let attendance  = load(KEYS.attendance,  {});
@@ -133,12 +135,27 @@ export const mockAuthLogin = async (username, password) => {
     return ok({ token: 'mock-token-' + Date.now(), user: { ...users[idx], permissions: ROLE_PERMS[u.role_name] || [] } });
   }
 
-  // Then check teachers & staff by auto-generated username
+  // Then check teachers & staff — match custom_username first, then auto-generated
   const allEmps = [
     ...teachers.map(e => ({ ...e, emp_type: 'teacher' })),
     ...staff.map(e => ({ ...e, emp_type: 'staff' })),
   ];
-  const emp = allEmps.find(e => makeUsername(e.name) === username);
+
+  // Priority 1: match a custom_username stored in the employee profile override
+  let emp = allEmps.find(e => {
+    const profileKey = `tsms_emp_profile_${e.emp_type}_${e.id}`;
+    try {
+      const saved = localStorage.getItem(profileKey);
+      if (!saved) return false;
+      const override = JSON.parse(saved);
+      return override.username && override.username.toLowerCase() === username.toLowerCase();
+    } catch { return false; }
+  });
+
+  // Priority 2: fall back to auto-derived first.last username
+  if (!emp) {
+    emp = allEmps.find(e => makeUsername(e.name) === username);
+  }
   if (emp) {
     if (passwords[username] !== password) fail('Invalid username or password.', 401);
     if (emp.status === 'Inactive') fail('Your account is deactivated. Contact the Administrator.', 403);
@@ -305,6 +322,46 @@ export const mockDeletePosition = async (id) => {
   return ok({ message: 'Position deleted.' });
 };
 
+export const mockGetTransfers = async (params = {}) => {
+  let list = [...transfers];
+  if (params.search) list = filterSearch(list, params.search, ['teacher_name', 'teacher_tid', 'from_school_name', 'to_school_name', 'status', 'reason']);
+  if (params.status) list = list.filter(t => t.status === params.status);
+  if (params.teacher_id) list = list.filter(t => String(t.teacher_id) === String(params.teacher_id));
+  if (params.school_id) list = list.filter(t => String(t.from_school_id) === String(params.school_id) || String(t.to_school_id) === String(params.school_id));
+  return ok({ data: list });
+};
+
+export const mockCreateTransfer = async (body) => {
+  if (!body.teacher_id || !body.to_school_id) fail('Teacher and destination school required.');
+  const teacher = teachers.find(t => String(t.id) === String(body.teacher_id));
+  const fromSchool = schools.find(s => s.id === teacher?.school_id);
+  const toSchool = schools.find(s => String(s.id) === String(body.to_school_id));
+  const rec = {
+    id: uid(),
+    teacher_id: +body.teacher_id,
+    teacher_name: teacher?.name || 'Unknown',
+    teacher_tid: teacher?.tid || '',
+    from_school_id: teacher?.school_id || null,
+    from_school_name: fromSchool?.name || null,
+    to_school_id: toSchool?.id || null,
+    to_school_name: toSchool?.name || null,
+    status: 'Pending',
+    request_date: new Date().toISOString().split('T')[0],
+    reason: body.reason || '',
+  };
+  transfers.unshift(rec);
+  save(KEYS.transfers, transfers);
+  return ok({ message: 'Transfer request created.', id: rec.id });
+};
+
+export const mockUpdateTransferStatus = async (id, body) => {
+  const existing = transfers.find(t => String(t.id) === String(id));
+  if (!existing) fail('Transfer not found.', 404);
+  existing.status = body.status || existing.status;
+  save(KEYS.transfers, transfers);
+  return ok({ message: `Transfer ${existing.status.toLowerCase()} successfully.` });
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // TEACHERS  — employees can only fetch their own record
 // ═══════════════════════════════════════════════════════════════════════════
@@ -315,6 +372,9 @@ export const mockGetTeachers = async (params = {}) => {
   if (params.school_id) list = list.filter(t => String(t.school_id) === String(params.school_id));
   // Employee self-filter: only return their own record
   if (params._emp_code) list = list.filter(t => t.tid === params._emp_code);
+  if (params.sort === 'az') {
+    list = list.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
+  }
   return ok(paginate(list, +params.page || 1, +params.limit || 10));
 };
 
@@ -326,6 +386,13 @@ export const mockCreateTeacher = async (body) => {
   const rec = { ...body, id: uid(), department_name: dept?.name || null, school_name: school?.name || null };
   teachers.unshift(rec);
   save(KEYS.teachers, teachers);
+
+  // Register login credentials for the new teacher
+  const username = makeUsername(rec.name);
+  if (!passwords[username]) {
+    passwords[username] = EMPLOYEE_DEFAULT_PASSWORD;
+    save(KEYS.passwords, passwords);
+  }
 
   // Update school teacher count
   if (body.school_id) {
@@ -410,6 +477,13 @@ export const mockCreateStaff = async (body) => {
   const rec = { ...body, id: uid(), department_name: dept?.name || null, school_name: school?.name || null };
   staff.unshift(rec);
   save(KEYS.staff, staff);
+
+  // Register login credentials for the new staff member
+  const username = makeUsername(rec.name);
+  if (!passwords[username]) {
+    passwords[username] = EMPLOYEE_DEFAULT_PASSWORD;
+    save(KEYS.passwords, passwords);
+  }
 
   // Update school staff count
   if (body.school_id) {
@@ -662,6 +736,78 @@ export const mockChangeEmployeePassword = async (username, currentPassword, newP
   return ok({ message: 'Password changed successfully.' });
 };
 
+// ── Username change (mock) ────────────────────────────────────────────────────
+export const mockChangeUsername = async (currentUser, newUsername) => {
+  const trimmed = newUsername.trim().toLowerCase();
+  if (!trimmed || trimmed.length < 3) fail('Username must be at least 3 characters.', 400);
+
+  // Check uniqueness across system users
+  if (users.find(u => u.username.toLowerCase() === trimmed && String(u.id) !== String(currentUser?.id))) {
+    fail('Username already taken.', 409);
+  }
+  // Check uniqueness across employee overrides
+  const allEmps = [
+    ...teachers.map(e => ({ ...e, emp_type: 'teacher' })),
+    ...staff.map(e => ({ ...e, emp_type: 'staff' })),
+  ];
+  for (const e of allEmps) {
+    // Skip the current user's own record
+    if (currentUser?.emp_type === e.emp_type && String(currentUser?.emp_id) === String(e.id)) continue;
+    try {
+      const saved = localStorage.getItem(`tsms_emp_profile_${e.emp_type}_${e.id}`);
+      if (saved) {
+        const ov = JSON.parse(saved);
+        if (ov.username && ov.username.toLowerCase() === trimmed) fail('Username already taken.', 409);
+      }
+    } catch { /* ignore */ }
+  }
+
+  const isEmp = !!(currentUser?.emp_type && currentUser?.emp_id != null);
+
+  if (isEmp) {
+    // For employees: store the new username in their profile override
+    const profileKey = `tsms_emp_profile_${currentUser.emp_type}_${currentUser.emp_id}`;
+    let override = {};
+    try { override = JSON.parse(localStorage.getItem(profileKey) || '{}'); } catch { /* ignore */ }
+    override.username = trimmed;
+    localStorage.setItem(profileKey, JSON.stringify(override));
+
+    // Also update the passwords store: new key = trimmed, keep old key as well
+    // so both old and new username work until next login
+    const oldUsername = currentUser.username;
+    if (oldUsername && passwords[oldUsername] !== undefined) {
+      passwords[trimmed] = passwords[oldUsername];
+      // Keep old key so session doesn't break immediately
+      save(KEYS.passwords, passwords);
+    }
+
+    return ok({
+      message: 'Username changed successfully.',
+      user: { ...currentUser, username: trimmed },
+    });
+  }
+
+  // System user: update username in users array and passwords store
+  const i = users.findIndex(u => String(u.id) === String(currentUser?.id));
+  if (i === -1) fail('User not found.', 404);
+
+  const oldUsername = users[i].username;
+  users[i] = { ...users[i], username: trimmed };
+  save(KEYS.users, users);
+
+  // Transfer password to new username key
+  if (passwords[oldUsername] !== undefined) {
+    passwords[trimmed] = passwords[oldUsername];
+    delete passwords[oldUsername];
+    save(KEYS.passwords, passwords);
+  }
+
+  return ok({
+    message: 'Username changed successfully.',
+    user: { ...users[i], permissions: ROLE_PERMS[users[i].role_name] || [] },
+  });
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // ATTENDANCE
 // ═══════════════════════════════════════════════════════════════════════════
@@ -674,15 +820,28 @@ export const mockGetAttendance = async (params = {}) => {
     filtered = filtered.filter(e => String(e.school_id) === String(params.school_id));
   }
 
-  const data = filtered.map(e => ({
-    id:          e.id,
-    emp_id:      e.tid || e.sid,
-    name:        e.name,
-    position:    e.position || '—',
-    school_name: e.school_name || '—',
-    school_id:   e.school_id  || null,
-    att_status:  attendance[`${type}-${e.id}-${params.date}`] || null,
-  }));
+  // For employee self-filter
+  if (params._emp_id) {
+    filtered = filtered.filter(e => e.id === +params._emp_id);
+  }
+
+  const data = filtered.map(e => {
+    const attKey = `${type}-${e.id}-${params.date}`;
+    const attRecord = attendance[attKey];
+    return {
+      id:          e.id,
+      emp_id:      e.tid || e.sid,
+      name:        e.name,
+      position:    e.position || '—',
+      school_name: e.school_name || '—',
+      school_id:   e.school_id  || null,
+      date:        params.date,
+      att_status:  typeof attRecord === 'string' ? attRecord : (attRecord?.status || null),
+      check_in:    attRecord?.check_in || null,
+      check_out:   attRecord?.check_out || null,
+      note:        attRecord?.note || null,
+    };
+  });
 
   return ok({ data, date: params.date, total: data.length, page: 1, limit: 100 });
 };
@@ -690,7 +849,13 @@ export const mockGetAttendance = async (params = {}) => {
 export const mockMarkAttendance = async (body) => {
   const { date, employee_type, records } = body;
   records.forEach(r => {
-    attendance[`${employee_type}-${r.employee_id}-${date}`] = r.status;
+    const key = `${employee_type}-${r.employee_id}-${date}`;
+    attendance[key] = {
+      status: r.status || 'Present',
+      check_in: r.check_in || new Date().toISOString(),
+      check_out: r.check_out || null,
+      note: r.note || null,
+    };
   });
   save(KEYS.attendance, attendance);
   return ok({ message: `Attendance saved for ${records.length} employees.` });

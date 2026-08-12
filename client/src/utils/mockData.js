@@ -78,6 +78,31 @@ export const mockPositions = [
   { id: 6, title: 'IT Officer',        department_name: null,             description: 'IT infrastructure management',             status: 'Active' },
 ];
 
+export const mockTransfers = [
+  {
+    id: 1,
+    teacher_id: 2,
+    teacher_name: 'Sarah Smith',
+    teacher_tid: 'TCH002',
+    from_school_name: 'Lemlem Primary School',
+    to_school_name: 'Ayat Primary School',
+    status: 'Pending',
+    request_date: '2026-07-01',
+    reason: 'Reassignment to science department',
+  },
+  {
+    id: 2,
+    teacher_id: 5,
+    teacher_name: 'Tigist Hailu',
+    teacher_tid: 'TCH005',
+    from_school_name: 'Wachale Primary School',
+    to_school_name: 'Goro Primary School',
+    status: 'Approved',
+    request_date: '2026-06-15',
+    reason: 'Staff redistribution',
+  },
+];
+
 export const mockUsers = [
   { id: 1, full_name: 'Nahom Eshetu', username: 'belete.guta',             email: 'nahom@tsms.gov.et',   phone: '+251911000001', role_id: 1, role_name: 'Administrator',     role_label: 'Administrator',     school_name: 'District Office',        status: 'Active',   last_login: new Date().toISOString() },
   { id: 2, full_name: 'Dawit Bekele',         username: 'schoolmanager',     email: 'manager@tsms.gov.et', phone: '+251922000002', role_id: 2, role_name: 'SchoolManager',     role_label: 'School Manager',    school_name: 'Wachale Primary School', status: 'Active',   last_login: new Date(Date.now() - 3600000).toISOString() },

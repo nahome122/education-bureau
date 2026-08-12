@@ -4,6 +4,8 @@
   "description": "Teacher & Staff Management System",
   "scripts": {
     "start": "node server/src/index.js",
+    "build": "npm install --prefix server && npm install --prefix client && npm run build --prefix client",
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
     "start:both": "concurrently \"npm run start --prefix server\" \"npm run dev --prefix client\"",
     "server": "npm run dev --prefix server",
     "client": "npm run dev --prefix client",

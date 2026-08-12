@@ -1,0 +1,56 @@
+.teacher-performance-page { animation: fadeIn 0.3s ease; }
+.report-filters { display: flex; gap: var(--spacing-md); align-items: flex-end; flex-wrap: wrap; }
+.search-input-wrap { position: relative; }
+.search-input-wrap .search-icon { position: absolute; top: 50%; left: 12px; transform: translateY(-50%); color: var(--text-muted); }
+.search-input-wrap .form-control { padding-left: 2.5rem; }
+.table-container { overflow-x: auto; }
+.data-table th, .data-table td { white-space: nowrap; }
+
+/* Button styling */
+.teacher-performance-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background-color: #2563EB;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #1D4ED8;
+}
+
+.btn-danger {
+  background-color: #DC2626;
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #B91C1C;
+}
+
+/* Action buttons styling */
+.data-table td .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+.btn-danger {
+  color: #DC2626;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: rgba(220, 38, 38, 0.1);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

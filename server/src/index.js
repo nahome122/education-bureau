@@ -4,18 +4,33 @@ const cors       = require('cors');
 const helmet     = require('helmet');
 const morgan     = require('morgan');
 const rateLimit  = require('express-rate-limit');
+const path       = require('path');
+const fs         = require('fs');
 const { testConnection } = require('./config/database');
 
 const app = express();
 
+const isProd      = process.env.NODE_ENV === 'production';
+// Resolve client/dist relative to the repo root (two levels up from server/src)
+const clientDist  = path.resolve(__dirname, '../../client/dist');
+
 // ─── Security Middleware ──────────────────────────────────────────────────────
-app.use(helmet());
-app.use(cors({
-  origin:      process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true,
-  methods:     ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+app.use(helmet({
+  // Allow the SPA to load its own scripts/styles
+  contentSecurityPolicy: false,
 }));
+
+// In production the server itself serves the client — no cross-origin needed.
+// In development the Vite dev server runs on a different port, so we allow it.
+const corsOptions = isProd
+  ? { origin: false }   // same-origin, CORS not needed
+  : {
+      origin:         process.env.CLIENT_URL || 'http://localhost:5173',
+      credentials:    true,
+      methods:        ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    };
+app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -50,8 +65,19 @@ app.use('/api/reports',     require('./routes/reports'));
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
-// 404
-app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found.' }));
+// ─── Serve React SPA in production ───────────────────────────────────────────
+if (isProd && fs.existsSync(clientDist)) {
+  // Serve static assets (JS, CSS, images, etc.)
+  app.use(express.static(clientDist, { maxAge: '7d' }));
+
+  // All non-API routes → return index.html so React Router handles them
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+} else {
+  // Development or missing dist — keep JSON 404 for API-only mode
+  app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found.' }));
+}
 
 // Error handler
 app.use((err, req, res, next) => {

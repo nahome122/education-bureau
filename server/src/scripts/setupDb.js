@@ -25,7 +25,7 @@ async function setup() {
     console.log('✅  Database schema created and seeded successfully.');
     console.log('');
     console.log('🔑  Default credentials:');
-    console.log('   Admin          → username: belete.guta    | password: Employee@123');
+    console.log('   Admin          → username: nahom.eshetu    | password: Employee@123');
     console.log('   School Manager → username: schoolmanager  | password: password');
     console.log('   Att. Officer   → username: attendanceofficer | password: password');
     console.log('   Viewer         → username: viewer         | password: password');

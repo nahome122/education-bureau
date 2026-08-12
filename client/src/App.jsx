@@ -13,13 +13,14 @@ import Schools     from './pages/schools/Schools';
 import Teachers    from './pages/teachers/Teachers';
 import Staff       from './pages/staff/Staff';
 import Departments from './pages/departments/Departments';
-import Positions   from './pages/positions/Positions';
 import Attendance  from './pages/attendance/Attendance';
+import AttendanceSummary from './pages/attendance/AttendanceSummary';
 import Reports     from './pages/reports/Reports';
+import Transfer    from './pages/transfer/Transfer';
+import TeacherPerformance from './pages/teacher-performance/TeacherPerformance';
 import Users       from './pages/users/Users';
 import Settings    from './pages/settings/Settings';
 import Profile     from './pages/profile/Profile';
-import Logs        from './pages/logs/Logs';
 import AccessDenied from './pages/errors/AccessDenied';
 import IdCards      from './pages/idcards/IdCards';
 
@@ -59,8 +60,6 @@ const AppRoutes = () => {
         <Route path="/users"   element={<RoleRoute adminOnly><Users /></RoleRoute>} />
         <Route path="/schools" element={<RoleRoute adminOnly><Schools /></RoleRoute>} />
         <Route path="/departments" element={<RoleRoute adminOnly><Departments /></RoleRoute>} />
-        <Route path="/positions"   element={<RoleRoute adminOnly><Positions /></RoleRoute>} />
-        <Route path="/logs"        element={<RoleRoute adminOnly><Logs /></RoleRoute>} />
         <Route path="/settings"    element={<RoleRoute adminOnly><Settings /></RoleRoute>} />
 
         {/* Shared by multiple roles */}
@@ -68,6 +67,9 @@ const AppRoutes = () => {
         <Route path="/staff"      element={<RoleRoute permission="staff"><Staff /></RoleRoute>} />
         <Route path="/id-cards"   element={<RoleRoute permission="id-cards"><IdCards /></RoleRoute>} />
         <Route path="/attendance" element={<RoleRoute permission="attendance"><Attendance /></RoleRoute>} />
+        <Route path="/attendance-summary" element={<RoleRoute permission="attendance"><AttendanceSummary /></RoleRoute>} />
+        <Route path="/teacher-performance" element={<RoleRoute permission="reports"><TeacherPerformance /></RoleRoute>} />
+        <Route path="/transfer"   element={<RoleRoute permission="reports"><Transfer /></RoleRoute>} />
         <Route path="/reports"    element={<RoleRoute permission="reports"><Reports /></RoleRoute>} />
         <Route path="/profile"    element={<RoleRoute permission="profile"><Profile /></RoleRoute>} />
 

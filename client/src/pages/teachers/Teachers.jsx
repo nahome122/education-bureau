@@ -25,6 +25,7 @@ const Teachers = () => {
   const [search,        setSearch]        = useState('');
   const [filterStatus,  setFilterStatus]  = useState('');
   const [filterSchool,  setFilterSchool]  = useState('');
+  const [sortOrder,     setSortOrder]     = useState('recent');
   const [showModal,     setShowModal]     = useState(false);
   const [editItem,      setEditItem]      = useState(null);
   const [form,          setForm]          = useState(EMPTY);
@@ -36,13 +37,13 @@ const Teachers = () => {
     setLoading(true);
     try {
       // Employees only see their own record — pass _emp_code to filter
-      const params = { page, limit: LIMIT, search, status: filterStatus, school_id: filterSchool };
+      const params = { page, limit: LIMIT, search, status: filterStatus, school_id: filterSchool, sort: sortOrder };
       if (isEmployee) params._emp_code = user.emp_code;
       const { data } = await getTeachers(params);
       if (data.success) { setTeachers(data.data); setTotal(data.total); }
     } catch { toast.error('Failed to load teachers.'); }
     setLoading(false);
-  }, [page, search, filterStatus, filterSchool, isEmployee, user]);
+  }, [page, search, filterStatus, filterSchool, sortOrder, isEmployee, user]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -63,8 +64,20 @@ const Teachers = () => {
     setSaving(true);
     try {
       const payload = { ...form, department_id: form.department_id ? parseInt(form.department_id) : null, school_id: form.school_id ? parseInt(form.school_id) : null, salary: parseFloat(form.salary)||0, experience: parseInt(form.experience)||0 };
-      if (editItem) { await updateTeacher(editItem.id, payload); toast.success('Teacher updated.'); }
-      else          { await createTeacher(payload);              toast.success('Teacher added.'); }
+      if (editItem) {
+        await updateTeacher(editItem.id, payload);
+        toast.success('Teacher updated.');
+      } else {
+        await createTeacher(payload);
+        const nameParts = form.name.trim().toLowerCase().split(/\s+/);
+        const autoUsername = nameParts.length > 1
+          ? `${nameParts[0]}.${nameParts[nameParts.length - 1]}`
+          : nameParts[0];
+        toast.success(
+          `Teacher added.\nLogin: ${autoUsername} / Password: Employee@123`,
+          { duration: 6000 }
+        );
+      }
       setShowModal(false); fetchData();
     } catch (err) { toast.error(err.response?.data?.message || 'Failed to save.'); }
     setSaving(false);
@@ -85,7 +98,7 @@ const Teachers = () => {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const params = { limit: 10000, ...(search && { search }), ...(filterStatus && { status: filterStatus }), ...(filterSchool && { school_id: filterSchool }) };
+      const params = { limit: 10000, ...(search && { search }), ...(filterStatus && { status: filterStatus }), ...(filterSchool && { school_id: filterSchool }), sort: sortOrder };
       if (isEmployee) params._emp_code = user.emp_code;
       const { data } = await getTeachers(params);
       if (data.success && data.data.length > 0) {
@@ -121,6 +134,13 @@ const Teachers = () => {
             <option value="">All Schools</option>
             {schools.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
+          <button
+            className={`btn ${sortOrder === 'az' ? 'btn-primary' : 'btn-ghost'}`}
+            onClick={() => { setSortOrder(prev => prev === 'az' ? 'recent' : 'az'); setPage(1); }}
+            style={{ minWidth: 96 }}
+          >
+            {sortOrder === 'az' ? 'A → Z' : 'A → Z'}
+          </button>
           <button className="btn btn-ghost btn-icon" onClick={fetchData}><MdRefresh /></button>
         </div>
       </div>

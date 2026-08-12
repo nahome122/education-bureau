@@ -1,10 +1,12 @@
+/* ── Mobile overlay (dims content when sidebar drawer is open) ── */
 .mobile-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55);
   z-index: calc(var(--z-sidebar) - 1);
   backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 @media (max-width: 768px) {
