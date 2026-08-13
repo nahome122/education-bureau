@@ -16,6 +16,28 @@ function parseDatabaseUrl(urlString) {
   }
 }
 
+function hasPlaceholderValue(value) {
+  if (value === undefined || value === null) return true;
+  const text = String(value).trim().toLowerCase();
+  if (!text) return true;
+
+  const placeholderPatterns = [
+    'your_db_',
+    'replace_with',
+    'example.com',
+    'yourhost',
+    'youruser',
+    'yourpassword',
+    'your_database',
+    'changeme',
+    'db_name',
+    'db_host',
+    'db_user',
+  ];
+
+  return placeholderPatterns.some((pattern) => text.includes(pattern));
+}
+
 let dbConfig = {
   host:     process.env.DB_HOST     || 'localhost',
   port:     parseInt(process.env.DB_PORT || '3306'),
@@ -32,6 +54,21 @@ if (urlSource) {
     dbConfig = Object.assign(dbConfig, parsed);
     console.log('🔗  Parsed DB URL, using host:', dbConfig.host, 'db:', dbConfig.database);
   }
+}
+
+const hasPlaceholderDatabaseConfig = [
+  dbConfig.host,
+  dbConfig.user,
+  dbConfig.password,
+  dbConfig.database,
+  urlSource,
+].some(hasPlaceholderValue);
+
+if (hasPlaceholderDatabaseConfig && process.env.NODE_ENV === 'production') {
+  const message = 'Database is not configured. Replace all placeholder values in server/.env with your real online MySQL credentials.';
+  console.error('❌ ' + message);
+  console.error('   Current DB values still include placeholder text such as your_db_host or your_db_name.');
+  throw new Error(message);
 }
 
 const pool = mysql.createPool(Object.assign({}, dbConfig, {
