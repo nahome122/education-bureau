@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Teacher & Staff Management System - Backend API",
   "type": "commonjs",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon src/index.js"
