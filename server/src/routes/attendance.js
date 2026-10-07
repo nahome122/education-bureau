@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { pool } = require('../config/database');
+const { pool, dbError } = require('../config/database');
 const { authenticate, authorize } = require('../middleware/auth');
 
 const ADMIN   = 'Administrator';
@@ -45,8 +45,8 @@ router.get('/', authenticate, async (req, res) => {
     const [rows] = await pool.query(nameSql, params);
     return res.json({ success: true, data: rows, date, total, page, limit });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -79,8 +79,8 @@ router.post('/mark', authenticate, authorize(ADMIN, MANAGER, OFFICER), async (re
       throw err;
     }
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -107,8 +107,8 @@ router.get('/stats', authenticate, async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 

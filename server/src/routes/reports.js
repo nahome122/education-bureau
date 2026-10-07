@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { pool } = require('../config/database');
+const { pool, dbError } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 
 // GET /api/reports/dashboard
@@ -54,8 +54,8 @@ router.get('/dashboard', authenticate, async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -85,8 +85,8 @@ router.get('/attendance', authenticate, async (req, res) => {
     const [rows] = await pool.query(sql, params);
     return res.json({ success: true, data: rows, from, to });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -110,7 +110,8 @@ router.get('/logs', authenticate, async (req, res) => {
     const [[{ total }]] = await pool.query(`SELECT COUNT(*) AS total FROM login_logs`);
     return res.json({ success: true, data: rows, total, page, limit });
   } catch (err) {
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 

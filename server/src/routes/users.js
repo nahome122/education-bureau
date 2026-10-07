@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const { body, query } = require('express-validator');
-const { pool } = require('../config/database');
+const { pool, dbError } = require('../config/database');
 const { authenticate, authorize } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 
@@ -44,8 +44,8 @@ router.get('/', authenticate, authorize(ADMIN), async (req, res) => {
 
     return res.json({ success: true, data: rows, total, page, limit });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -82,8 +82,8 @@ router.post(
 
       return res.status(201).json({ success: true, message: 'User created successfully.', id: result.insertId });
     } catch (err) {
-      console.error(err);
-      return res.status(500).json({ success: false, message: 'Server error.' });
+      const { status, message } = dbError(err);
+      return res.status(status).json({ success: false, message });
     }
   }
 );
@@ -110,8 +110,8 @@ router.put('/:id', authenticate, authorize(ADMIN), async (req, res) => {
 
     return res.json({ success: true, message: 'User updated successfully.' });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -125,8 +125,8 @@ router.delete('/:id', authenticate, authorize(ADMIN), async (req, res) => {
     await pool.query('DELETE FROM users WHERE id = ?', [id]);
     return res.json({ success: true, message: 'User deleted.' });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -142,8 +142,8 @@ router.post('/:id/reset-password', authenticate, authorize(ADMIN), async (req, r
     await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [hash, id]);
     return res.json({ success: true, message: 'Password reset successfully.' });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -161,8 +161,8 @@ router.patch('/:id/status', authenticate, authorize(ADMIN), async (req, res) => 
     await pool.query('UPDATE users SET status = ? WHERE id = ?', [status, id]);
     return res.json({ success: true, message: `User ${status === 'Active' ? 'activated' : 'deactivated'}.` });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -172,7 +172,8 @@ router.get('/roles', authenticate, authorize(ADMIN), async (req, res) => {
     const [rows] = await pool.query('SELECT id, name, label FROM roles ORDER BY id');
     return res.json({ success: true, data: rows });
   } catch (err) {
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 

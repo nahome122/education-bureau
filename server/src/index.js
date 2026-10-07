@@ -60,6 +60,7 @@ app.use('/api/staff',       require('./routes/staff'));
 app.use('/api/departments', require('./routes/departments'));
 app.use('/api/positions',   require('./routes/positions'));
 app.use('/api/attendance',  require('./routes/attendance'));
+app.use('/api/transfers',   require('./routes/transfers'));
 app.use('/api/reports',     require('./routes/reports'));
 
 // Health check
@@ -79,10 +80,52 @@ if (isProd && fs.existsSync(clientDist)) {
   app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found.' }));
 }
 
-// Error handler
+// Error handler — translates MySQL errors to meaningful JSON responses
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ success: false, message: 'Internal server error.' });
+  // If it came from a route that already used dbError(), just forward
+  if (err.isDbError) {
+    return res.status(err.status || 500).json({ success: false, message: err.message });
+  }
+
+  // MySQL / DB errors
+  const mysqlCodes = {
+    'ER_DUP_ENTRY':           { status: 409, message: 'Duplicate entry — record already exists.' },
+    'ER_ROW_IS_REFERENCED_2': { status: 409, message: 'Cannot delete — this record is referenced by other data.' },
+    'ER_NO_REFERENCED_ROW_2': { status: 400, message: 'Foreign key error — referenced record does not exist.' },
+    'ER_BAD_FIELD_ERROR':     { status: 500, message: `Unknown column: ${err.sqlMessage || ''}` },
+    'ER_NO_SUCH_TABLE':       { status: 500, message: 'Table does not exist — run migrations.' },
+    'ER_ACCESS_DENIED_ERROR': { status: 500, message: 'MySQL access denied — check DB credentials.' },
+    'ER_BAD_DB_ERROR':        { status: 500, message: 'Database not found — run setupDb.js.' },
+    'ER_PARSE_ERROR':         { status: 500, message: 'SQL syntax error.' },
+    'ER_LOCK_WAIT_TIMEOUT':   { status: 503, message: 'Database lock timeout — try again.' },
+    'ECONNREFUSED':           { status: 503, message: 'Cannot connect to MySQL — make sure XAMPP is running.' },
+    'ETIMEDOUT':              { status: 503, message: 'Database connection timed out.' },
+    'PROTOCOL_CONNECTION_LOST': { status: 503, message: 'Database connection lost.' },
+  };
+
+  const code = err.code || '';
+  if (mysqlCodes[code]) {
+    console.error(`[DB ERROR] ${code}:`, err.sqlMessage || err.message);
+    const { status, message } = mysqlCodes[code];
+    return res.status(status).json({ success: false, message, code });
+  }
+
+  // JWT errors
+  if (err.name === 'JsonWebTokenError')  return res.status(401).json({ success: false, message: 'Invalid token.' });
+  if (err.name === 'TokenExpiredError')  return res.status(401).json({ success: false, message: 'Token expired.' });
+
+  // Validation errors (express-validator)
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ success: false, message: 'Invalid JSON in request body.' });
+  }
+
+  // Generic fallback
+  console.error('[SERVER ERROR]', err.stack || err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal server error.',
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
+  });
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────

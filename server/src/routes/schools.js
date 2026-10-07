@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { body } = require('express-validator');
-const { pool } = require('../config/database');
+const { pool, dbError } = require('../config/database');
 const { authenticate, authorize } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 
@@ -30,8 +30,8 @@ router.get('/', authenticate, async (req, res) => {
     const [rows] = await pool.query(sql, params);
     return res.json({ success: true, data: rows, total, page, limit });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -56,8 +56,8 @@ router.post('/', authenticate, authorize(ADMIN),
       );
       return res.status(201).json({ success: true, message: 'School created.', id: result.insertId });
     } catch (err) {
-      console.error(err);
-      return res.status(500).json({ success: false, message: 'Server error.' });
+      const { status, message } = dbError(err);
+      return res.status(status).json({ success: false, message });
     }
   }
 );
@@ -76,8 +76,8 @@ router.put('/:id', authenticate, authorize(ADMIN), async (req, res) => {
     );
     return res.json({ success: true, message: 'School updated.' });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -87,8 +87,8 @@ router.delete('/:id', authenticate, authorize(ADMIN), async (req, res) => {
     await pool.query('DELETE FROM schools WHERE id = ?', [req.params.id]);
     return res.json({ success: true, message: 'School deleted.' });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 

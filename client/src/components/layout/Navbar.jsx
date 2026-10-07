@@ -87,16 +87,26 @@ const Navbar = ({ onMobileMenuToggle }) => {
 
       {/* Right actions */}
       <div className="navbar-actions">
-        {/* Background mode switch */}
-        <button
-          className={`navbar-bg-switcher ${accentKey === 'amber' ? 'navbar-bg-switcher--amber' : ''}`}
-          onClick={() => setAccentKey(prev => prev === 'forest' ? 'amber' : 'forest')}
-          aria-pressed={accentKey === 'amber'}
-          title="Toggle background mode"
-        >
-          <span className="navbar-bg-switcher-track" />
-          <span className="navbar-bg-switcher-thumb" />
-        </button>
+
+        {/* Background color switcher — two pill buttons */}
+        <div className="navbar-bg-switcher-group">
+          <button
+            className={`navbar-bg-btn navbar-bg-btn--green ${accentKey === 'forest' ? 'navbar-bg-btn--active' : ''}`}
+            onClick={() => setAccentKey('forest')}
+            title="Green background"
+            aria-label="Green background"
+          >
+            <span className="navbar-bg-btn-dot" />
+          </button>
+          <button
+            className={`navbar-bg-btn navbar-bg-btn--orange ${accentKey === 'amber' ? 'navbar-bg-btn--active' : ''}`}
+            onClick={() => setAccentKey('amber')}
+            title="Orange background"
+            aria-label="Orange background"
+          >
+            <span className="navbar-bg-btn-dot" />
+          </button>
+        </div>
 
         {/* Profile dropdown */}
         <div className="navbar-dropdown" ref={profileRef}>

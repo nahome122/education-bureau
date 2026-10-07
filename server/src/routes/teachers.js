@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { body } = require('express-validator');
-const { pool } = require('../config/database');
+const { pool, dbError } = require('../config/database');
 const { authenticate, authorize } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 
@@ -41,8 +41,8 @@ router.get('/', authenticate, async (req, res) => {
     const data = rows.map(r => ({ ...r, subjects: JSON.parse(r.subjects || '[]') }));
     return res.json({ success: true, data, total, page, limit });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -75,8 +75,8 @@ router.post('/', authenticate, authorize(ADMIN, MANAGER),
       );
       return res.status(201).json({ success: true, message: 'Teacher added.', id: result.insertId });
     } catch (err) {
-      console.error(err);
-      return res.status(500).json({ success: false, message: 'Server error.' });
+      const { status, message } = dbError(err);
+      return res.status(status).json({ success: false, message });
     }
   }
 );
@@ -104,8 +104,8 @@ router.put('/:id', authenticate, authorize(ADMIN, MANAGER), async (req, res) => 
     );
     return res.json({ success: true, message: 'Teacher updated.' });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 
@@ -115,8 +115,8 @@ router.delete('/:id', authenticate, authorize(ADMIN, MANAGER), async (req, res) 
     await pool.query('DELETE FROM teachers WHERE id = ?', [req.params.id]);
     return res.json({ success: true, message: 'Teacher deleted.' });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const { status, message } = dbError(err);
+    return res.status(status).json({ success: false, message });
   }
 });
 

@@ -26,11 +26,8 @@ export const AuthProvider = ({ children }) => {
       const override = JSON.parse(saved);
       const { full_name, phone, email, gender, dob, address, bio, username } = override;
       return { ...u, full_name, phone, email, gender, dob, address, bio, ...(username ? { username } : {}) };
-    } catch {
-      return u;
-    }
+    } catch { return u; }
   }, []);
-
 
   // Re-hydrate session on mount
   useEffect(() => {
@@ -77,7 +74,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const changePassword = useCallback(async (current_password, new_password) => {
-    // In mock mode — use the mock password store directly (works for all users)
     if (isMock) {
       try {
         const { data } = await changeEmployeePw(user?.username, current_password, new_password);
@@ -94,26 +90,17 @@ export const AuthProvider = ({ children }) => {
     }
   }, [isMock, user]);
 
-  // Update the stored user object (used after profile edit)
   const refreshUser = useCallback((updatedUser) => {
-    // Persist updated user to whichever storage holds the token
     const inLocal   = !!localStorage.getItem('tsms_token');
     const inSession = !!sessionStorage.getItem('tsms_token');
     const json = JSON.stringify(updatedUser);
     if (inLocal)   localStorage.setItem('tsms_user',   json);
     if (inSession) sessionStorage.setItem('tsms_user', json);
-    // For employees: also save their profile overrides to localStorage
-    // so changes survive tab closes (sessionStorage clears on tab close)
-    // Note: employee objects use employee_type/employee_id (from JWT / buildEmployeeAuthUser)
     const empType = updatedUser?.employee_type || updatedUser?.emp_type;
     const empId   = updatedUser?.employee_id   || updatedUser?.emp_id;
     if (empType && empId != null) {
-      localStorage.setItem(
-        `tsms_emp_profile_${empType}_${empId}`,
-        json
-      );
+      localStorage.setItem(`tsms_emp_profile_${empType}_${empId}`, json);
     }
-    // Update React state last (triggers re-render)
     setUser(updatedUser);
   }, []);
 
@@ -125,15 +112,10 @@ export const AuthProvider = ({ children }) => {
     if (trimmed === user?.username?.toLowerCase()) {
       return { success: false, message: 'New username must be different from current.' };
     }
-
     try {
-      // Routes through call() — uses real backend if up, mock if down.
-      // Mock path also updates the passwords store so login works immediately.
       const { data } = await changeUsernameApi(user, trimmed);
       if (data.success) {
-        const updatedUser = data.user
-          ? { ...user, ...data.user }
-          : { ...user, username: trimmed };
+        const updatedUser = data.user ? { ...user, ...data.user } : { ...user, username: trimmed };
         refreshUser(updatedUser);
       }
       return data;
@@ -159,10 +141,9 @@ export const AuthProvider = ({ children }) => {
   const isSchoolManager = user?.role_name === 'SchoolManager';
   const isOfficer       = user?.role_name === 'AttendanceOfficer';
   const isViewer        = user?.role_name === 'Viewer';
-  // Employee (teacher/staff logged in as themselves)
   const isEmployee      = user?.role_name === 'Teacher' || user?.role_name === 'Staff';
-  // Check if the current user "owns" a specific employee record
-  const isOwnRecord     = (empType, empCode) => isEmployee && user?.emp_type === empType && user?.emp_code === empCode;
+  const isOwnRecord     = (empType, empCode) =>
+    isEmployee && user?.emp_type === empType && user?.emp_code === empCode;
 
   return (
     <AuthContext.Provider value={{

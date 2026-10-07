@@ -2,7 +2,7 @@ const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body } = require('express-validator');
-const { pool } = require('../config/database');
+const { pool, dbError } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 
@@ -199,8 +199,8 @@ router.post(
         },
       });
     } catch (err) {
-      console.error('Login error:', err);
-      return res.status(500).json({ success: false, message: 'Server error.' });
+      const { status, message } = dbError(err);
+      return res.status(status).json({ success: false, message });
     }
   }
 );
@@ -275,8 +275,8 @@ router.put(
         },
       });
     } catch (err) {
-      console.error(err);
-      return res.status(500).json({ success: false, message: 'Server error.' });
+      const { status, message } = dbError(err);
+      return res.status(status).json({ success: false, message });
     }
   }
 );
@@ -305,8 +305,8 @@ router.post(
 
       return res.json({ success: true, message: 'Password changed successfully.' });
     } catch (err) {
-      console.error(err);
-      return res.status(500).json({ success: false, message: 'Server error.' });
+      const { status, message } = dbError(err);
+      return res.status(status).json({ success: false, message });
     }
   }
 );
@@ -445,8 +445,8 @@ router.put(
         },
       });
     } catch (err) {
-      console.error(err);
-      return res.status(500).json({ success: false, message: 'Server error.' });
+      const { status, message } = dbError(err);
+      return res.status(status).json({ success: false, message });
     }
   }
 );

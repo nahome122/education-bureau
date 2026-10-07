@@ -153,6 +153,32 @@ CREATE TABLE IF NOT EXISTS login_logs (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
+-- ----------------------- transfers ---------------------------
+CREATE TABLE IF NOT EXISTS transfers (
+  id               INT AUTO_INCREMENT PRIMARY KEY,
+  teacher_id       INT          NOT NULL,
+  teacher_name     VARCHAR(150),
+  teacher_tid      VARCHAR(20),
+  from_school_id   INT,
+  from_school_name VARCHAR(200),
+  to_school_id     INT,
+  to_school_name   VARCHAR(200),
+  status           ENUM('Pending','Approved','Rejected') DEFAULT 'Pending',
+  request_date     DATE,
+  approved_date    DATE,
+  reason           TEXT,
+  notes            TEXT,
+  requested_by     INT,
+  approved_by      INT,
+  created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (teacher_id)   REFERENCES teachers(id) ON DELETE CASCADE,
+  FOREIGN KEY (from_school_id) REFERENCES schools(id) ON DELETE SET NULL,
+  FOREIGN KEY (to_school_id)   REFERENCES schools(id) ON DELETE SET NULL,
+  FOREIGN KEY (requested_by)   REFERENCES users(id)   ON DELETE SET NULL,
+  FOREIGN KEY (approved_by)    REFERENCES users(id)   ON DELETE SET NULL
+);
+
 -- ============================================================
 -- Seed: Roles
 -- ============================================================
