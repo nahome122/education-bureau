@@ -1,0 +1,114 @@
+/* MyDashboard */
+.my-dashboard { display: flex; flex-direction: column; gap: 20px; max-width: 900px; }
+
+/* Welcome card */
+.my-welcome-card {
+  background: var(--gradient-primary);
+  border-radius: var(--radius-2xl);
+  padding: 28px 32px;
+  display: flex; align-items: center; gap: 20px;
+  color: #fff;
+  box-shadow: var(--shadow-primary);
+}
+.my-welcome-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.4);
+}
+.my-welcome-info { flex: 1; }
+.my-welcome-name { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+.my-welcome-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px; opacity: 0.9; }
+.my-welcome-meta span { display: flex; align-items: center; gap: 5px; }
+.my-welcome-date { text-align: right; }
+.my-welcome-today-label { display: block; font-size: 11px; opacity: 0.7; margin-bottom: 2px; }
+.my-welcome-today-date { font-size: 14px; font-weight: 600; }
+
+/* Section title */
+.my-section-title {
+  font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-secondary); margin-bottom: -10px;
+}
+
+/* Today card */
+.my-today-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-xl);
+  padding: 22px 28px;
+  box-shadow: var(--card-shadow);
+}
+.my-today-loading { display: flex; justify-content: center; padding: 20px; }
+.my-today-content { display: flex; align-items: center; gap: 20px; }
+.my-today-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+.my-today-icon--present    { background: rgba(16,185,129,0.12); color: #10b981; }
+.my-today-icon--absent     { background: rgba(239,68,68,0.12); color: #ef4444; }
+.my-today-icon--late       { background: rgba(245,158,11,0.12); color: #f59e0b; }
+.my-today-icon--on-leave   { background: rgba(59,130,246,0.12); color: #3b82f6; }
+.my-today-icon--pending    { background: var(--bg-secondary); color: var(--text-muted); font-size: 22px; font-weight: 600; }
+.my-today-status-label     { margin-bottom: 6px; }
+.badge-lg { padding: 5px 12px; font-size: 13px; }
+.my-today-times { font-size: 13px; color: var(--text-secondary); display: flex; gap: 16px; flex-wrap: wrap; }
+.my-today-note  { font-size: 13px; color: var(--text-muted); }
+
+/* Summary grid */
+.my-summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.my-summary-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius-xl); padding: 20px;
+  text-align: center;
+  border-bottom: 3px solid var(--acc, var(--primary));
+  box-shadow: var(--card-shadow);
+  transition: transform var(--transition-fast);
+}
+.my-summary-card:hover { transform: translateY(-2px); }
+.my-summary-val { font-size: 32px; font-weight: 800; }
+.my-summary-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-top: 4px; }
+
+/* Rate bar */
+.my-rate-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius-xl); padding: 20px 24px;
+  box-shadow: var(--card-shadow);
+}
+.my-rate-header {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 14px; font-weight: 500; margin-bottom: 12px;
+  color: var(--text-primary);
+}
+.my-rate-bar {
+  height: 10px; background: var(--bg-secondary);
+  border-radius: var(--radius-full); overflow: hidden;
+}
+.my-rate-fill { height: 100%; border-radius: var(--radius-full); transition: width 0.8s ease; }
+.my-rate-note { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+
+/* Quick links */
+.my-quick-links { display: flex; gap: 12px; flex-wrap: wrap; }
+.my-quick-card {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); padding: 14px 20px;
+  font-size: 14px; font-weight: 500; color: var(--text-primary);
+  text-decoration: none; transition: all var(--transition-fast);
+  box-shadow: var(--shadow-xs);
+}
+.my-quick-card svg { font-size: 20px; color: var(--primary); }
+.my-quick-card:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 640px) {
+  .my-summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .my-welcome-card { flex-wrap: wrap; }
+  .my-welcome-date { display: none; }
+}

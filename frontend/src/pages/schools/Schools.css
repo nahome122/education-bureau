@@ -1,0 +1,21 @@
+.schools-page { animation: fadeIn 0.3s ease; }
+.schools-filters { margin-bottom: var(--spacing-xl); }
+.filters-row { display: flex; gap: var(--spacing-md); align-items: center; }
+.school-status-filter { width: 180px; flex: 0 0 180px; }
+.schools-table { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card-bg); }
+.schools-table .data-table { min-width: 940px; }
+.school-table-name, .school-table-address { display: block; }
+.school-table-name { color: var(--text-primary); font-weight: 600; }
+.school-table-address { color: var(--text-muted); font-size: var(--font-size-xs); margin-top: 2px; }
+.table-actions { display: flex; gap: 6px; }
+.btn-danger-icon { color: var(--danger) !important; }
+.delete-icon-wrap { width: 64px; height: 64px; background: var(--danger-alpha); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--danger); margin: 0 auto var(--spacing-md); }
+.id-code { font-family: monospace; font-size: 12px; background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px; }
+.spinner-sm { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 640px) {
+  .filters-row { align-items: stretch; flex-wrap: wrap; }
+  .school-status-filter { width: auto; flex: 1; }
+  .filters-row .search-input-wrap { flex-basis: 100%; }
+}

@@ -1,0 +1,21 @@
+.reports-page { animation: fadeIn 0.3s ease; }
+.report-filters { display: flex; gap: var(--spacing-md); align-items: flex-end; flex-wrap: wrap; }
+.report-filter-section { padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--border); }
+.report-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); border-block: 1px solid var(--border); }
+.report-summary-item { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 16px; border-right: 1px solid var(--border-light); }
+.report-summary-item span { color: var(--text-secondary); font-size: var(--font-size-sm); }
+.report-summary-item strong { color: var(--text-primary); font-size: var(--font-size-xl); }
+.report-chart { min-width: 0; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.report-form-section, .school-reports-section { padding: 18px 0; border-top: 1px solid var(--border); }
+.report-review, .report-history { padding: 14px 0; border-block: 1px solid var(--border-light); }
+.report-review > h4, .report-history > h4 { margin-bottom: var(--spacing-md); }
+.report-review .btn + .btn { margin-left: var(--spacing-sm); }
+.school-reports-section .table-container { border-bottom: 1px solid var(--border); }
+.user-cell { display: flex; align-items: center; gap: var(--spacing-sm); }
+
+@media (max-width: 640px) {
+  .report-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .report-summary-item { padding: 12px 8px; }
+  .report-filters { align-items: stretch; }
+  .report-filters .form-group { flex: 1 1 130px; }
+}

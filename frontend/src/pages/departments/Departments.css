@@ -1,0 +1,24 @@
+.departments-page { animation: fadeIn 0.3s ease; }
+.dept-filters { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(160px, 220px) minmax(140px, 180px); gap: var(--spacing-md); margin-bottom: var(--spacing-xl); }
+.dept-table { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card-bg); }
+.dept-table .data-table { min-width: 820px; }
+.dept-table-name, .dept-table-id { display: block; }
+.dept-table-name { font-weight: 600; color: var(--text-primary); }
+.dept-table-id { color: var(--text-muted); font-size: var(--font-size-xs); margin-top: 2px; }
+.dept-description { max-width: 280px; }
+.dept-actions { display: flex; gap: 6px; white-space: nowrap; }
+.btn-danger-icon { color: var(--danger) !important; border-color: var(--danger-alpha) !important; }
+.btn-danger-icon:hover { background: var(--danger-alpha) !important; }
+.delete-icon-wrap { width: 64px; height: 64px; background: var(--danger-alpha); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--danger); margin: 0 auto var(--spacing-md); }
+.spinner-sm { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 720px) {
+  .dept-filters { grid-template-columns: 1fr 1fr; }
+  .dept-filters .search-input-wrap { grid-column: 1 / -1; }
+}
+
+@media (max-width: 480px) {
+  .dept-filters { grid-template-columns: 1fr; }
+  .dept-filters .search-input-wrap { grid-column: auto; }
+}

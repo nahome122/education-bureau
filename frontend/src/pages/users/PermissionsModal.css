@@ -1,0 +1,88 @@
+/* PermissionsModal */
+.perm-modal { max-width: 780px; }
+.modal-xl   { max-width: 780px; }
+
+.perm-modal-title-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.perm-modal-shield {
+  font-size: 22px;
+  color: var(--primary);
+}
+
+.perm-modal-body { padding: 0; }
+
+.perm-table-wrap {
+  overflow-x: auto;
+  padding: 0 24px 8px;
+}
+
+.perm-skeleton { padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+
+.perm-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.perm-matrix-table thead tr {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border);
+}
+
+.perm-matrix-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.perm-module-col { width: 200px; min-width: 160px; }
+.perm-action-col { width: 90px; text-align: center !important; }
+
+.perm-row { border-bottom: 1px solid var(--border-light); transition: background var(--transition-fast); }
+.perm-row:hover { background: var(--bg-secondary); }
+.perm-row:last-child { border-bottom: none; }
+
+.perm-module-name {
+  padding: 10px 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.perm-action-cell {
+  text-align: center;
+  padding: 8px 12px;
+}
+
+.perm-checkbox-label { display: inline-flex; align-items: center; cursor: pointer; }
+.perm-checkbox-input { display: none; }
+
+.perm-checkbox {
+  width: 20px; height: 20px;
+  border-radius: 5px;
+  border: 2px solid var(--border);
+  background: var(--card-bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  transition: all var(--transition-fast);
+  color: transparent;
+}
+
+.perm-checkbox--checked {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.perm-checkbox-label:hover .perm-checkbox {
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+/* Dark mode */
+[data-theme="dark"] .perm-matrix-table thead tr { background: var(--bg-tertiary); }
+[data-theme="dark"] .perm-row:hover { background: var(--bg-secondary); }

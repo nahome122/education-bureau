@@ -1,13 +1,26 @@
+# Dependencies
 node_modules/
-client/node_modules/
-server/node_modules/
+**/node_modules/
 
+# Secrets and local environment overrides
 .env
-client/.env
-server/.env
+.env.*
+!.env.example
+!.env.*.example
 
+# Build output
 dist/
+dist-ssr/
 build/
+coverage/
+backend/storage/
+
+# Logs and local files
+*.log
+*.local
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
 
 nul
-server/nul
+backend/nul

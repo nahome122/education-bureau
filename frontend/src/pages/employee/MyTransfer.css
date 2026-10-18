@@ -1,0 +1,15 @@
+.my-transfer-page { display: flex; flex-direction: column; gap: var(--spacing-lg); animation: fadeIn 0.3s ease; }
+.my-transfer-header { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); }
+.my-transfer-form, .my-transfer-history { padding: var(--spacing-xl); }
+.my-transfer-form h2, .my-transfer-history h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: var(--font-size-lg); }
+.my-transfer-hint, .my-transfer-history-heading p { color: var(--text-secondary); font-size: var(--font-size-sm); margin: 0 0 var(--spacing-lg); }
+.my-transfer-form .form-group { margin-bottom: var(--spacing-md); }
+.my-transfer-submit { display: flex; justify-content: flex-end; }
+.my-transfer-history-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
+.my-transfer-empty { padding: var(--spacing-xl); text-align: center; color: var(--text-secondary); }
+.my-transfer-history td { min-width: 110px; }
+@media (max-width: 700px) {
+  .my-transfer-header { align-items: flex-start; flex-direction: column; }
+  .my-transfer-form, .my-transfer-history { padding: var(--spacing-lg); }
+  .my-transfer-history-heading { flex-direction: column; }
+}

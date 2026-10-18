@@ -1,0 +1,496 @@
+/* ═══════════════════════════════════════════════════════════
+   Login Page — Mobile Optimized
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Wrapper & Background ───────────────────────────────── */
+.login-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f3f5f7;
+  position: relative;
+  overflow-y: auto;
+  padding: 20px;
+  font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Subtle grid mesh overlay */
+.login-wrapper::before {
+  display: none;
+}
+
+/* Floating glow orbs */
+.login-wrapper::after {
+  display: none;
+}
+
+/* Watermark logo */
+.login-watermark {
+  position: absolute;
+  inset: 0;
+  background: url('/logo.jpg') center center / 480px 480px no-repeat;
+  display: none;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Main card ────────────────────────────────────────────── */
+.login-card {
+  display: flex;
+  width: 100%;
+  max-width: 460px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 14px 36px rgba(16,38,59,0.12), 0 0 0 1px #e1e6eb;
+  position: relative;
+  z-index: 1;
+  animation: none;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: scale(0.94) translateY(24px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Form panel ──────────────────────────────────────────── */
+.login-form-panel {
+  flex: 1;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 36px;
+}
+
+.login-form-inner {
+  width: 100%;
+  max-width: 360px;
+}
+
+/* ── Logo ────────────────────────────────────────────────– */
+.login-logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.login-logo-img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 50%;
+  box-shadow: none;
+}
+
+.login-logo-icon {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #0d2147, #1a3a6b);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(13, 33, 71, 0.45);
+  flex-shrink: 0;
+}
+
+.login-logo-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #17324d;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+/* ── Titles ──────────────────────────────────────────────– */
+.login-title {
+  font-size: 25px;
+  font-weight: 800;
+  color: #17324d;
+  letter-spacing: -0.5px;
+  margin-bottom: 3px;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: #526273;
+  line-height: 1.5;
+  margin-bottom: 22px;
+  text-align: center;
+}
+
+/* ── Error ───────────────────────────────────────────────– */
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  color: #C81E1E;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25%      { transform: translateX(-6px); }
+  75%      { transform: translateX(6px); }
+}
+.animate-shake { animation: shake 0.35s ease; }
+
+/* ── Form ────────────────────────────────────────────────– */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.login-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #17324d;
+}
+
+.login-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-input-icon {
+  position: absolute;
+  left: 9px;
+  font-size: 14px;
+  color: #526b80;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.login-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 40px 10px 36px;
+  background: #fff;
+  border: 1px solid #d9e0e6;
+  border-radius: 7px;
+  font-size: 14px;
+  color: #172b3d;
+  font-family: inherit;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.login-input::placeholder {
+  color: #758494;
+  opacity: 0.85;
+}
+
+.login-input:focus {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #294b68;
+  box-shadow: 0 0 0 3px rgba(23,50,77,0.10);
+}
+
+.login-input:focus + .login-input-icon,
+.login-input-wrap:focus-within .login-input-icon {
+  color: #17324d;
+}
+
+.login-eye-btn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #526b80;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.login-eye-btn:hover {
+  color: #b85c18;
+}
+
+/* ── Remember row ────────────────────────────────────────– */
+.login-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.login-remember {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #526273;
+  cursor: pointer;
+  user-select: none;
+}
+
+.login-checkbox {
+  width: 14px;
+  height: 14px;
+  accent-color: #17324d;
+  cursor: pointer;
+}
+
+/* ── Submit button ───────────────────────────────────────– */
+.login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  width: 100%;
+  background: #17324d;
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(16,38,59,0.16);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  margin-top: 2px;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: #10263b;
+  box-shadow: 0 3px 8px rgba(16,38,59,0.2);
+}
+
+.login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-btn.loading {
+  opacity: 0.85;
+  cursor: not-allowed;
+}
+
+.login-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Copyright ───────────────────────────────────────────– */
+.login-copyright {
+  display: block;
+  text-align: center;
+  margin: 14px auto 0;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: #758494;
+  line-height: 1.3;
+}
+
+/* ── Responsive ──────────────────────────────────────────– */
+@media (max-width: 480px) {
+  .login-wrapper {
+    padding: 16px;
+  }
+
+  .login-card {
+    border-radius: 14px;
+  }
+
+  .login-form-panel {
+    padding: 24px 20px;
+  }
+
+  .login-form-inner {
+    max-width: 100%;
+  }
+
+  .login-title {
+    font-size: 22px;
+  }
+
+  .login-subtitle {
+    font-size: 10px;
+  }
+
+  .login-logo-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .login-logo-label {
+    font-size: 10px;
+  }
+
+  .login-input {
+    padding: 10px 40px 10px 36px;
+    font-size: 14px;
+  }
+
+  .login-btn {
+    padding: 11px 16px;
+    font-size: 12px;
+  }
+
+}
+
+/* ── Forgot password link ──────────────────────────── */
+.login-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.login-forgot-link {
+  font-size: 12px;
+  font-weight: 500;
+  color: #294b68;
+  text-decoration: none;
+  transition: color var(--transition-fast, 120ms ease);
+}
+.login-forgot-link:hover { color: #b85c18; }
+
+/* ── Forgot password — step indicator ─────────────── */
+.forgot-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 28px;
+  margin-top: 8px;
+}
+.forgot-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.forgot-step-icon {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  color: rgba(255,255,255,0.35);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+.forgot-step.active .forgot-step-icon {
+  background: rgba(249,115,22,0.18);
+  color: #f97316;
+  border-color: rgba(249,115,22,0.5);
+}
+.forgot-step-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.forgot-step.active .forgot-step-label { color: rgba(255,255,255,0.8); }
+
+.forgot-step-line {
+  width: 48px;
+  height: 2px;
+  background: rgba(255,255,255,0.1);
+  margin-bottom: 20px;
+  transition: background 0.3s ease;
+}
+.forgot-step-line.active { background: rgba(249,115,22,0.5); }
+
+/* ── Mock code display ────────────────────────────── */
+.forgot-mock-code {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(249,115,22,0.12);
+  border: 1px solid rgba(249,115,22,0.35);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.forgot-mock-label { color: rgba(255,255,255,0.7); }
+.forgot-mock-val {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #f97316;
+  font-family: 'Courier New', monospace;
+}
+
+/* Code input — wider tracking */
+.login-input--code {
+  letter-spacing: 6px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ── Success state ────────────────────────────────── */
+.forgot-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+.forgot-success-icon {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: rgba(5,122,85,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  color: #10b981;
+  border: 2px solid rgba(16,185,129,0.3);
+  margin-bottom: 8px;
+}
+
+/* ── Back link ────────────────────────────────────── */
+.forgot-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color var(--transition-fast, 120ms ease);
+  font-family: inherit;
+}
+.forgot-back-link:hover { color: #f97316; }

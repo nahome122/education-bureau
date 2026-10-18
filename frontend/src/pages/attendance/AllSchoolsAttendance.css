@@ -1,0 +1,59 @@
+.all-attendance-page { display: flex; flex-direction: column; gap: var(--spacing-lg); animation: fadeIn 0.3s ease; }
+.all-attendance-header, .all-attendance-actions, .all-attendance-pagination, .all-attendance-pagination > div { display: flex; align-items: center; gap: var(--spacing-sm); }
+.all-attendance-header { justify-content: space-between; flex-wrap: wrap; }
+.all-attendance-actions { flex-wrap: wrap; }
+.all-attendance-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); align-items: end; gap: var(--spacing-md); padding: 0 0 var(--spacing-md); border-bottom: 1px solid var(--border); }
+.all-attendance-filters .form-group { margin: 0; min-width: 0; }
+.all-attendance-school-filter { min-width: 200px !important; }
+.all-attendance-filter-error { color: var(--danger); font-size: var(--font-size-xs); }
+.all-attendance-apply { justify-self: start; }
+.all-attendance-definition { padding: 0 var(--spacing-sm); font-size: var(--font-size-sm); }
+.all-attendance-error { border: 1px solid var(--danger); background: var(--danger-alpha); color: var(--danger); border-radius: var(--radius-md); padding: var(--spacing-md); }
+.all-attendance-demo-notice { border: 1px solid #f59e0b; background: #fffbeb; color: #92400e; border-radius: var(--radius-md); padding: var(--spacing-md); }
+.all-attendance-stats { display: flex; flex-wrap: wrap; border-block: 1px solid var(--border); }
+.all-attendance-stat { display: flex; flex: 1 1 140px; align-items: baseline; justify-content: space-between; gap: 8px; padding: 12px 16px; border-right: 1px solid var(--border-light); }
+.all-attendance-stat span { color: var(--text-secondary); font-size: var(--font-size-sm); }
+.all-attendance-stat strong { color: var(--text-primary); font-size: var(--font-size-3xl); line-height: 1.2; }
+.all-attendance-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-lg); }
+.all-attendance-chart { min-width: 0; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.all-attendance-chart h2, .all-attendance-section-heading h2 { display: flex; align-items: center; gap: 8px; font-size: var(--font-size-lg); margin-bottom: var(--spacing-md); }
+.all-attendance-chart-canvas { position: relative; height: 290px; }
+.all-attendance-school-table, .all-attendance-details { padding: 16px 0; border-top: 1px solid var(--border); scroll-margin-top: calc(var(--navbar-height) + var(--spacing-lg)); }
+.all-attendance-section-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
+.all-attendance-section-heading p { color: var(--text-secondary); font-size: var(--font-size-sm); }
+.all-attendance-empty { min-height: 100px; display: grid; place-items: center; text-align: center; color: var(--text-secondary); padding: var(--spacing-lg); }
+.all-attendance-submission { display: inline-block; white-space: nowrap; border-radius: 999px; padding: 3px 9px; font-size: var(--font-size-xs); font-weight: 700; }
+.all-attendance-submission--submitted { color: #047857; background: #d1fae5; }
+.all-attendance-submission--partial { color: #92400e; background: #fef3c7; }
+.all-attendance-submission--missing { color: #b91c1c; background: #fee2e2; }
+.all-attendance-submission--no-teachers { color: var(--text-secondary); background: var(--bg-secondary); }
+.all-attendance-pagination { justify-content: space-between; margin-top: var(--spacing-md); }
+.all-attendance-pagination > div { gap: var(--spacing-sm); }
+
+@media (max-width: 900px) {
+  .all-attendance-charts { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .all-attendance-actions { width: 100%; }
+  .all-attendance-actions .btn { flex: 1; justify-content: center; }
+  .all-attendance-filters { grid-template-columns: 1fr; }
+  .all-attendance-apply { width: 100%; justify-content: center; }
+  .all-attendance-stat { padding: var(--spacing-md) 8px; }
+  .all-attendance-stat strong { font-size: var(--font-size-2xl); }
+  .all-attendance-section-heading { flex-direction: column; }
+  .all-attendance-chart-canvas { height: 240px; }
+}
+
+@media print {
+  .all-attendance-header .all-attendance-actions,
+  .all-attendance-filters,
+  .all-attendance-school-table button,
+  .all-attendance-pagination { display: none !important; }
+  .all-attendance-page { gap: 12px; }
+  .all-attendance-charts { grid-template-columns: 1fr 1fr; }
+  .all-attendance-chart-canvas { height: 210px; }
+  .all-attendance-school-table, .all-attendance-details, .all-attendance-chart { break-inside: avoid; }
+  .table-container { overflow: visible; }
+  .data-table { min-width: 0; font-size: 9px; }
+}

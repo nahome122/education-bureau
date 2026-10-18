@@ -1,81 +1,53 @@
-# Quick Start Guide - Login Options
+# Quick Start
 
-## ✅ Option 1: Use Mock Mode NOW (No Database Setup Required)
+## Prerequisites
 
-The app works in **offline mock mode** with full functionality. Just run the commands below in two separate terminals.
+- Node.js and npm
+- MySQL (XAMPP is supported for local development)
 
-```powershell
-# Terminal 1 - Start Server
-cd "C:\Users\Nafel\OneDrive\Desktop\woreda education\server"
-npm install
-npm run dev
+## First-time setup
 
-# Terminal 2 - Start Client
-cd "C:\Users\Nafel\OneDrive\Desktop\woreda education\client"
-npm install
-npm run dev
-```
+1. Start MySQL.
+2. Copy `backend/.env.example` to `backend/.env` and set local database values.
+3. Install and set up the backend:
 
-If you are already in the workspace root, you can instead use:
+   ```powershell
+   cd backend
+   npm install
+   npm run db:setup
+   npm run db:migrate-teacher-scores
+   npm run db:migrate-school-management
+   npm run db:migrate-transfer-history-clear
+   npm run db:migrate-attendance-school
+   npm run db:remove-audit-logs
+   ```
 
-```powershell
-cd server
-npm install
-npm run dev
-```
+   Review and back up the target database before running the school-management
+   and attendance migrations. They are intentionally not run by the
+   application. The attendance migration adds school attribution to existing
+   attendance rows and backfills from each employee's current school assignment
+   where available; previous school assignments cannot be inferred from the
+   old schema.
+   The audit-log removal migration permanently deletes the audit_logs table
+   and its stored entries from an existing database. Back up the database
+   before running it.
+4. In a second terminal, install and start the frontend:
 
-and in the other terminal:
+   ```powershell
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-```powershell
-cd client
-npm install
-npm run dev
-```
+5. In the backend terminal, start the API:
 
-Then open: `http://localhost:5173`
+   ```powershell
+   npm run dev
+   ```
 
-### Login Credentials (Mock Mode):
-```
-Username: belete.guta
-Password: Employee@123
-```
+Open `http://localhost:5173`. Vite proxies `/api` to
+`http://localhost:5000` by default. Set `VITE_PROXY_TARGET` in the frontend
+environment to override the local proxy target, or set `VITE_API_URL` to use a
+direct API URL.
 
-This works **immediately** - no database setup needed. All data persists in browser localStorage.
-
----
-
-## Option 2: Setup MariaDB (For Production)
-
-MariaDB is installed at `C:\Program Files\MariaDB` but needs configuration.
-
-### Step 1: Start MariaDB
-Open Command Prompt (cmd.exe) as Administrator and run:
-
-```cmd
-"C:\Program Files\MariaDB\bin\mysqld" --console
-```
-
-### Step 2: In a new Command Prompt, reset credentials:
-
-```cmd
-cd "C:\Users\Nafel\OneDrive\Desktop\wachale woreda education\server"
-node src/scripts/resetUsers.js
-```
-
-### Step 3: Then start your app
-```bash
-npm run dev
-```
-
----
-
-## Recommended: Start with Mock Mode
-
-👉 **For testing and development:** Use mock mode (Option 1)  
-👉 **For production/persistent data:** Setup MariaDB (Option 2)
-
-Mock mode includes:
-- ✅ Full CRUD operations
-- ✅ All features working
-- ✅ Data persists in browser
-- ✅ No database setup required
+See [README.md](./README.md) for deployment and environment-variable guidance.
